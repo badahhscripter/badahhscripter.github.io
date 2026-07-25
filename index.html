@@ -428,7 +428,7 @@
                 masterList.push(d); 
             }); 
         }         
-        filterFeed(isAdminUser);                 
+        filterFeed(posts);                 
         if(auth.currentUser) {             
             loadUserAssetQueue(auth.currentUser.uid);            
             if(isAdminUser) renderOwnerAdminPanels();         
