@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-    <title>BadahhScripts</title>
-    <link rel="icon" type="image/png" href="favicon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asset & Script Repository</title>
+    <title>BadahhScripts</title>
+    <link rel="icon" type="image/png" href="favicon.png">
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -42,24 +41,27 @@
             --maker-preview: #cbd5e1;
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg);
             color: var(--text-main);
-            margin: 0;
+            min-height: 100vh;
             padding: 16px;
             transition: background 0.2s ease, color 0.2s ease;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background: var(--card);
             padding: 24px;
             border-radius: 12px;
             border: 1px solid var(--border);
+            min-height: calc(100vh - 32px);
+            display: flex;
+            flex-direction: column;
         }
 
         .header-bar {
@@ -91,7 +93,7 @@
         .tab-navigation {
             display: flex;
             gap: 8px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             border-bottom: 1px solid var(--border);
             padding-bottom: 12px;
             overflow-x: auto;
@@ -255,9 +257,9 @@
         }
 
         .action-btn {
-            padding: 10px 20px;
+            padding: 8px 14px;
             font-weight: 600;
-            font-size: 0.875rem;
+            font-size: 0.8125rem;
             border-radius: 6px;
             cursor: pointer;
             border: none;
@@ -267,6 +269,8 @@
         .action-btn:hover { opacity: 0.9; }
         .like-btn { background: var(--danger); color: #ffffff; }
         .copy-btn { background: var(--accent); color: #ffffff; }
+        .success-btn { background: var(--success); color: #ffffff; }
+        .gold-btn { background: var(--gold); color: #000000; }
         .follow-btn { background: var(--card); border: 1px solid var(--border); color: var(--text-main); }
 
         .profile-badge {
@@ -285,12 +289,26 @@
         .rating-stars { display: inline-flex; gap: 4px; font-size: 24px; color: var(--text-muted); cursor: pointer; }
         .rating-stars span.selected { color: var(--gold); }
 
-        /* SCRIPT/UI MAKER PANEL STYLES */
+        /* SCRIPT / UI MAKER FULLSCREEN RESPONSIVE LAYOUT */
+        .maker-container {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 650px;
+        }
+
+        .maker-mobile-tabs {
+            display: none;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
         .workspace-wrapper {
             display: grid;
-            grid-template-columns: 280px 1fr 340px;
+            grid-template-columns: 320px 1fr 380px;
             width: 100%;
-            height: 650px;
+            flex: 1;
+            min-height: 600px;
             background: var(--bg);
             border-radius: 8px;
             overflow: hidden;
@@ -308,7 +326,7 @@
 
         .column-header {
             padding: 12px 16px;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.25);
             border-bottom: 1px solid var(--border);
             font-size: 11px;
             font-weight: 700;
@@ -354,7 +372,7 @@
         .tree-node.active { background: var(--accent); color: #ffffff; font-weight: 600; }
 
         .center-workspace { display: flex; flex-direction: column; background: var(--maker-preview); }
-        .preview-area { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; overflow: auto; }
+        .preview-area { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; overflow: auto; min-height: 280px; }
 
         .rbx-window {
             background: #12121c;
@@ -365,6 +383,7 @@
             position: relative;
             overflow: hidden;
             color: #ffffff;
+            max-width: 100%;
         }
 
         .rbx-topbar {
@@ -390,17 +409,45 @@
         .code-display {
             flex: 1; width: 100%; height: 100%; background: var(--input-bg);
             color: var(--success); border: none; padding: 14px; font-family: monospace; font-size: 11px; outline: none; resize: none;
+            min-height: 250px;
         }
 
-        /* Mobile Adjustments */
-        @media (max-width: 850px) {
-            .workspace-wrapper { grid-template-columns: 1fr; height: auto; }
-            .column { height: 350px; }
+        .admin-card {
+            background: var(--input-bg);
+            padding: 14px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .admin-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        /* Mobile Adjustments for UI Maker */
+        @media (max-width: 900px) {
+            .workspace-wrapper { grid-template-columns: 1fr; min-height: auto; }
+            .maker-mobile-tabs { display: flex; }
+            .column.mobile-hidden { display: none !important; }
+            .column { height: 500px; }
         }
 
         @media (max-width: 640px) {
             body { padding: 8px; }
-            .container { padding: 14px; }
+            .container { padding: 12px; }
             .feed-card { flex-direction: column; }
             .card-preview-img { width: 100%; height: 140px; }
             .controls-row { flex-direction: column; }
@@ -411,7 +458,7 @@
 
 <div class="container">
     <div class="header-bar">
-        <div class="brand-title">Asset Index</div>
+        <div class="brand-title">Asset Index & UI Builder</div>
         <button class="theme-toggle-btn" onclick="toggleTheme()">Theme Mode</button>
     </div>
 
@@ -451,31 +498,37 @@
         <div id="feedList">Synchronizing index logs...</div>
     </div>
 
-    <div id="view-maker-view" class="view-panel hidden">
-        <div style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="margin:0;">Interactive UI / Luau Script Builder</h3>
-            <button onclick="exportMakerCodeToSubmit()" class="action-btn copy-btn" style="font-size:0.8125rem; padding:6px 14px;">Export to Submit Tab</button>
+    <div id="view-maker-view" class="view-panel hidden maker-container">
+        <div style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <h3 style="margin:0;">Interactive UI & Luau Script Generator</h3>
+            <button onclick="exportMakerCodeToSubmit()" class="action-btn copy-btn">Export to Submit Tab</button>
+        </div>
+
+        <div class="maker-mobile-tabs">
+            <button class="nav-btn active" id="mMaker1" onclick="switchMakerMobileTab(1)">1. Layout Creator</button>
+            <button class="nav-btn" id="mMaker2" onclick="switchMakerMobileTab(2)">2. Preview & Inspector</button>
+            <button class="nav-btn" id="mMaker3" onclick="switchMakerMobileTab(3)">3. Luau Output</button>
         </div>
 
         <div class="workspace-wrapper">
-            <div class="column">
+            <div class="column" id="makerCol1">
                 <div class="column-header">UI Layout Creator</div>
                 <div class="scrollable-body">
                     <div class="control-grid">
-                        <button class="btn-action" onclick="addTab()">Add Tab Section <span>+</span></button>
-                        <button class="btn-action" onclick="addElement('button')">Add Action Button <span>+</span></button>
-                        <button class="btn-action" onclick="addElement('toggle')">Add Loop Toggle <span>+</span></button>
+                        <button class="btn-action" onclick="addTab()">📁 Add Tab Section <span>+</span></button>
+                        <button class="btn-action" onclick="addElement('button')">🔘 Add Action Button <span>+</span></button>
+                        <button class="btn-action" onclick="addElement('toggle')">🎛️ Add Loop Toggle <span>+</span></button>
                     </div>
 
                     <div class="column-header" style="padding:8px 0; background:none; border:none; margin-bottom:4px;">Interface Tree</div>
                     <div class="tree-container">
-                        <div class="tree-node" id="rootNode" onclick="selectTarget('global', 'global')">Main Window Settings</div>
+                        <div class="tree-node" id="rootNode" onclick="selectTarget('global', 'global')">⚙️ Main Window Settings</div>
                         <div id="hierarchyTree"></div>
                     </div>
                 </div>
             </div>
 
-            <div class="column center-workspace">
+            <div class="column center-workspace" id="makerCol2">
                 <div class="column-header">Interactive Layout Preview</div>
                 
                 <div class="preview-area">
@@ -491,7 +544,7 @@
                     </div>
                 </div>
 
-                <div class="column" style="height:240px; border-top:1px solid var(--border); border-right:none;">
+                <div class="column" style="height:260px; border-top:1px solid var(--border); border-right:none;">
                     <div class="column-header" id="inspectorTitle">Properties Inspector</div>
                     <div class="scrollable-body">
                         <div id="noSelectionMessage" style="color:var(--text-muted); font-size:12px; text-align:center;">Select a layout asset to modify properties.</div>
@@ -531,11 +584,11 @@
                 </div>
             </div>
 
-            <div class="column code-output-column">
+            <div class="column code-output-column" id="makerCol3">
                 <div class="column-header">Compiled Luau Code</div>
                 <textarea id="luauCodeBox" class="code-display" readonly spellcheck="false"></textarea>
                 <div style="padding:10px; border-top:1px solid var(--border);">
-                    <button class="action-btn copy-btn" style="width:100%;" onclick="copyLuauScript()">Copy Roblox Script</button>
+                    <button class="action-btn copy-btn" style="width:100%;" onclick="copyLuauScript()">Copy Native Roblox Script</button>
                 </div>
             </div>
         </div>
@@ -543,7 +596,7 @@
 
     <div id="view-submit-view" class="view-panel hidden">
         <h3>Publish an Asset</h3>
-        <div id="submitFormFields">
+        <div id="submitFormFields" style="margin-top:12px;">
             <div style="margin-bottom:12px;">
                 <label style="font-size:0.875rem; color:var(--text-muted);">Category</label>
                 <select id="submitType" style="margin-top:4px;">
@@ -578,7 +631,7 @@
     <div id="view-account-view" class="view-panel hidden">
         <div id="unauth-box">
             <h3>Gateway Verification</h3>
-            <div style="background:var(--input-bg); padding:12px; border-radius:6px; border:1px solid var(--border); text-align:center; margin-bottom:12px;">
+            <div style="background:var(--input-bg); padding:12px; border-radius:6px; border:1px solid var(--border); text-align:center; margin:12px 0;">
                 <span id="captchaDisplay" style="font-weight:bold;">Calculating...</span>
                 <input type="number" id="captchaInput" placeholder="Answer" style="margin-top:8px; text-align:center; max-width:120px; display:block; margin-left:auto; margin-right:auto;">
             </div>
@@ -589,24 +642,28 @@
         </div>
         <div id="setup-box" class="hidden">
             <h3>Complete Profile</h3>
-            <input type="text" id="usernameIn" placeholder="Username Handle" style="margin-bottom:12px;">
+            <input type="text" id="usernameIn" placeholder="Username Handle" style="margin:12px 0;">
             <button onclick="saveProfileNode()" class="action-btn copy-btn" style="width:100%;">Save & Continue</button>
         </div>
         <div id="dashboard-box" class="hidden">
             <h3>Your Asset Submissions</h3>
-            <div id="userLibraryQueue">No submissions logged.</div>
+            <div id="userLibraryQueue" style="margin-top:12px;">No submissions logged.</div>
         </div>
     </div>
 
     <div id="view-admin-view" class="view-panel hidden">
-        <h3 style="color:var(--gold);">Management System</h3>
-        <div style="margin-bottom:20px;">
-            <h4>Pending Reviews</h4>
+        <h3 style="color:var(--gold); margin-bottom:16px;">Management Control System</h3>
+        <div style="margin-bottom:24px;">
+            <h4 style="margin-bottom:8px; color:var(--gold);">Pending Moderation Queue</h4>
             <div id="adminPendingContainer">No pending items.</div>
         </div>
-        <div>
-            <h4>Approved Index</h4>
+        <div style="margin-bottom:24px;">
+            <h4 style="margin-bottom:8px; color:var(--success);">Approved Live Index</h4>
             <div id="adminApprovedContainer">No active items.</div>
+        </div>
+        <div>
+            <h4 style="margin-bottom:8px; color:var(--danger);">Rejected / Archived Index</h4>
+            <div id="adminRejectedContainer">No rejected items.</div>
         </div>
     </div>
 </div>
@@ -676,16 +733,21 @@
     window.onload = function() {
         selectTarget('global', 'global');
         renderMakerUI();
+        if (window.innerWidth <= 900) switchMakerMobileTab(1);
     };
 
-    // THEME TOGGLE
+    window.onresize = function() {
+        if (window.innerWidth > 900) {
+            document.querySelectorAll('.maker-container .column').forEach(col => col.classList.remove('mobile-hidden'));
+        }
+    };
+
     function toggleTheme() {
         const currentTheme = document.documentElement.getAttribute('data-theme');
         const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
         document.documentElement.setAttribute('data-theme', nextTheme);
     }
 
-    // CAPTCHA GENERATOR
     function genCap() {
         const a = Math.floor(Math.random() * 8) + 2;
         const b = Math.floor(Math.random() * 9) + 1;
@@ -699,6 +761,20 @@
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
         const tabTarget = document.getElementById('tab' + viewId.split('-')[0].charAt(0).toUpperCase() + viewId.split('-')[0].slice(1));
         if(tabTarget) tabTarget.classList.add('active');
+    }
+
+    function switchMakerMobileTab(colNum) {
+        if (window.innerWidth > 900) return;
+        document.getElementById('makerCol1').classList.add('mobile-hidden');
+        document.getElementById('makerCol2').classList.add('mobile-hidden');
+        document.getElementById('makerCol3').classList.add('mobile-hidden');
+        
+        document.getElementById('mMaker1').classList.remove('active');
+        document.getElementById('mMaker2').classList.remove('active');
+        document.getElementById('mMaker3').classList.remove('active');
+
+        document.getElementById(`makerCol${colNum}`).classList.remove('mobile-hidden');
+        document.getElementById(`mMaker${colNum}`).classList.add('active');
     }
 
     // REALTIME DATABASE LISTENER
@@ -753,6 +829,7 @@
             isAdminUser = true;
             document.getElementById('tabAdmin').classList.remove('hidden');
             document.getElementById('submitTypeExecutorOpt').disabled = false;
+            renderOwnerAdminPanels();
         } else {
             isAdminUser = false;
             document.getElementById('tabAdmin').classList.add('hidden');
@@ -777,7 +854,6 @@
         rtdb.ref('users/' + auth.currentUser.uid).set({ username: name, uid: auth.currentUser.uid }).then(() => location.reload());
     }
 
-    // STRICT SCRIPT VALIDATION
     function validateScriptPayload(text) {
         const rawPastePattern = /^loadstring\s*\(\s*game\s*:\s*HttpGet\s*\(\s*["']https?:\/\/(pastebin\.com|pastefy\.app|raw\.githubusercontent\.com)\/[^"']+\/raw["']\s*\)\s*\)\s*\(\s*\)$/i;
         const luaKeywords = ["function", "local", "then", "end", "elseif", "do", "repeat", "until"];
@@ -828,7 +904,6 @@
         }
     }
 
-    // FEED RENDER WITH SHOW MORE
     function filterFeed() {
         const query = (document.getElementById('searchBar').value || '').toLowerCase();
         const category = document.getElementById('categoryFilter').value;
@@ -885,7 +960,6 @@
         elem.innerHTML = `${fullDesc} <button class="show-more-btn" onclick="event.stopPropagation(); filterFeed()">Show Less</button>`;
     }
 
-    // WORKSPACE MODAL
     function openWorkspace(id) {
         const item = masterList.find(x => x.id === id);
         if(!item) return;
@@ -934,7 +1008,6 @@
         else navigator.clipboard.writeText(item.code).then(() => alert("Code copied to clipboard."));
     }
 
-    // TOGGLE LIKES DATABASE LOGIC
     function likeCurrentScript() {
         if(!auth.currentUser) return alert("Log in to vote.");
         if(!activeScriptId) return;
@@ -954,7 +1027,6 @@
         });
     }
 
-    // SINGLE RATING LOGIC
     function submitRating(val) {
         if(!auth.currentUser) return alert("Log in to rate.");
         if(!activeScriptId) return;
@@ -998,7 +1070,6 @@
         });
     }
 
-    // FOLLOW / UNFOLLOW SYSTEM
     function toggleFollowAuthor() {
         if(!auth.currentUser) return alert("Log in to follow users.");
         if(!activeAuthorUid || activeAuthorUid === auth.currentUser.uid) return alert("Cannot follow yourself.");
@@ -1047,42 +1118,94 @@
         }
 
         queueBox.innerHTML = userItems.map(item => `
-            <div style="background:var(--input-bg); padding:10px; margin-bottom:8px; border-radius:6px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+            <div style="background:var(--input-bg); padding:10px; margin-bottom:8px; border-radius:6px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                 <div>
                     <strong>${item.title}</strong> [${item.type.toUpperCase()}]
-                    <div style="font-size:0.75rem; color:var(--text-muted);">Status: ${item.status.toUpperCase()}</div>
+                    <div style="font-size:0.75rem; color:var(--text-muted);">Status: ${(item.status || 'pending').toUpperCase()}</div>
                 </div>
-                <button onclick="rtdb.ref('scripts/${item.id}').remove()" class="action-btn" style="background:var(--danger); color:#fff; padding:4px 8px;">Delete</button>
+                <button onclick="rtdb.ref('scripts/${item.id}').remove()" class="action-btn like-btn">Delete</button>
             </div>
         `).join('');
     }
 
+    // FIXED ADMIN MODERATION RENDERER
     function renderOwnerAdminPanels() {
+        if (!isAdminUser) return;
+
         const pendingBox = document.getElementById('adminPendingContainer');
         const approvedBox = document.getElementById('adminApprovedContainer');
+        const rejectedBox = document.getElementById('adminRejectedContainer');
 
-        const pending = masterList.filter(x => x.status === 'pending');
+        const pending = masterList.filter(x => !x.status || x.status === 'pending');
         const approved = masterList.filter(x => x.status === 'approved');
+        const rejected = masterList.filter(x => x.status === 'rejected');
 
         pendingBox.innerHTML = pending.length ? pending.map(item => `
-            <div style="background:var(--input-bg); padding:10px; margin-bottom:8px; border-radius:6px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-                <div><strong>${item.title}</strong> by ${item.submittedBy}</div>
-                <div>
-                    <button onclick="rtdb.ref('scripts/${item.id}/status').set('approved')" class="action-btn" style="background:var(--success); color:#fff; padding:4px 8px;">Approve</button>
-                    <button onclick="rtdb.ref('scripts/${item.id}').remove()" class="action-btn" style="background:var(--danger); color:#fff; padding:4px 8px;">Reject</button>
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <div>
+                        <strong>${item.title}</strong> <span class="category-badge">${item.type}</span>
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">Submitted by: ${item.submittedBy} (${item.userId})</div>
+                    </div>
+                    <div class="admin-actions">
+                        <button onclick="updateScriptStatus('${item.id}', 'approved')" class="action-btn success-btn">Approve</button>
+                        <button onclick="updateScriptStatus('${item.id}', 'rejected')" class="action-btn like-btn">Reject</button>
+                        <button onclick="deleteScriptRecord('${item.id}')" class="action-btn" style="background:var(--input-bg); border:1px solid var(--border); color:#fff;">Delete</button>
+                    </div>
                 </div>
+                <div style="font-size:0.8125rem; color:var(--text-muted);">${item.description}</div>
+                <pre style="font-size:11px; max-height:100px;">${item.code}</pre>
             </div>
         `).join('') : '<div style="color:var(--text-muted);">No pending reviews.</div>';
 
         approvedBox.innerHTML = approved.length ? approved.map(item => `
-            <div style="background:var(--input-bg); padding:10px; margin-bottom:8px; border-radius:6px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-                <div><strong>${item.title}</strong></div>
-                <button onclick="rtdb.ref('scripts/${item.id}').remove()" class="action-btn" style="background:var(--danger); color:#fff; padding:4px 8px;">Remove</button>
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <div>
+                        <strong>${item.title}</strong> <span class="category-badge">${item.type}</span>
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">Author: ${item.submittedBy}</div>
+                    </div>
+                    <div class="admin-actions">
+                        <button onclick="updateScriptStatus('${item.id}', 'pending')" class="action-btn gold-btn">Send to Pending</button>
+                        <button onclick="updateScriptStatus('${item.id}', 'rejected')" class="action-btn like-btn">Reject</button>
+                        <button onclick="deleteScriptRecord('${item.id}')" class="action-btn" style="background:var(--input-bg); border:1px solid var(--border); color:#fff;">Delete</button>
+                    </div>
+                </div>
             </div>
         `).join('') : '<div style="color:var(--text-muted);">No active items.</div>';
+
+        rejectedBox.innerHTML = rejected.length ? rejected.map(item => `
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <div>
+                        <strong>${item.title}</strong> <span class="category-badge">${item.type}</span>
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">Author: ${item.submittedBy}</div>
+                    </div>
+                    <div class="admin-actions">
+                        <button onclick="updateScriptStatus('${item.id}', 'approved')" class="action-btn success-btn">Approve</button>
+                        <button onclick="updateScriptStatus('${item.id}', 'pending')" class="action-btn gold-btn">Send to Pending</button>
+                        <button onclick="deleteScriptRecord('${item.id}')" class="action-btn like-btn">Delete Permanently</button>
+                    </div>
+                </div>
+            </div>
+        `).join('') : '<div style="color:var(--text-muted);">No rejected items.</div>';
     }
 
-    // UI MAKER BUILDER LOGIC (FROM script.html)
+    function updateScriptStatus(id, newStatus) {
+        if (!isAdminUser) return alert("Unauthorized.");
+        rtdb.ref(`scripts/${id}/status`).set(newStatus).then(() => {
+            alert(`Asset set to ${newStatus.toUpperCase()}`);
+        });
+    }
+
+    function deleteScriptRecord(id) {
+        if (!isAdminUser) return alert("Unauthorized.");
+        if (confirm("Are you sure you want to permanently delete this asset?")) {
+            rtdb.ref(`scripts/${id}`).remove();
+        }
+    }
+
+    // UI MAKER BUILDER LOGIC
     function renderMakerUI() {
         renderTree();
         renderPreview();
@@ -1157,14 +1280,16 @@
             let tab = uiProject.tabs.find(t => t.id === id);
             document.getElementById('inspectorTitle').innerText = "Tab Properties";
             document.getElementById('labelName').innerText = "Tab Display Name";
-            document.getElementById('propName').value = tab.name;
+            document.getElementById('propName').value = tab ? tab.name : "";
         } else if (type === 'element') {
             let el = null;
             for (let t of uiProject.tabs) { if (el = t.elements.find(e => e.id === id)) break; }
             document.getElementById('inspectorTitle').innerText = "Component Settings";
             document.getElementById('labelName').innerText = "Button / Toggle Label";
-            document.getElementById('propName').value = el.name;
-            document.getElementById('propCode').value = el.code;
+            if(el) {
+                document.getElementById('propName').value = el.name;
+                document.getElementById('propCode').value = el.code;
+            }
             codeRow.style.display = "flex";
         }
         renderTree();
@@ -1196,7 +1321,7 @@
         uiProject.tabs.forEach(t => {
             let tNode = document.createElement('div');
             tNode.className = `tree-node ${selectedId === t.id ? 'active' : ''}`;
-            tNode.innerHTML = `<span>[Tab] ${t.name}</span>`;
+            tNode.innerHTML = `<span>📁 ${t.name}</span>`;
             tNode.onclick = () => { currentTabId = t.id; selectTarget(t.id, 'tab'); };
             container.appendChild(tNode);
 
@@ -1204,7 +1329,7 @@
                 let eNode = document.createElement('div');
                 eNode.className = `tree-node ${selectedId === e.id ? 'active' : ''}`;
                 eNode.style.paddingLeft = "20px";
-                eNode.innerHTML = `<span>${e.type === 'button' ? 'Action:' : 'Loop:'} ${e.name}</span>`;
+                eNode.innerHTML = `<span>${e.type === 'button' ? '🔘' : '🎛️'} ${e.name}</span>`;
                 eNode.onclick = (evt) => { evt.stopPropagation(); selectTarget(e.id, 'element'); };
                 container.appendChild(eNode);
             });
@@ -1264,6 +1389,10 @@
         lua += `MainFrame.Active = true\n`;
         lua += `MainFrame.Parent = ScreenGui\n\n`;
 
+        lua += `local UICorner_Main = Instance.new("UICorner")\n`;
+        lua += `UICorner_Main.CornerRadius = UDim.new(0, 8)\n`;
+        lua += `UICorner_Main.Parent = MainFrame\n\n`;
+
         lua += `local TopBar = Instance.new("Frame")\n`;
         lua += `TopBar.Size = UDim2.new(1, 0, 0, 36)\n`;
         lua += `TopBar.BackgroundColor3 = Color3.fromRGB(24, 24, 38)\n`;
@@ -1286,15 +1415,72 @@
         lua += `CloseBtn.Parent = TopBar\n`;
         lua += `CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)\n\n`;
 
+        lua += `local Sidebar = Instance.new("ScrollingFrame")\n`;
+        lua += `Sidebar.Size = UDim2.new(0, 140, 1, -36)\n`;
+        lua += `Sidebar.Position = UDim2.new(0, 0, 0, 36)\n`;
+        lua += `Sidebar.BackgroundColor3 = Color3.fromRGB(14, 14, 22)\n`;
+        lua += `Sidebar.BorderSizePixel = 0\n`;
+        lua += `Sidebar.Parent = MainFrame\n\n`;
+
+        lua += `local SidebarList = Instance.new("UIListLayout")\n`;
+        lua += `SidebarList.Padding = UDim.new(0, 4)\n`;
+        lua += `SidebarList.Parent = Sidebar\n\n`;
+
+        lua += `local ContentWindow = Instance.new("Frame")\n`;
+        lua += `ContentWindow.Size = UDim2.new(1, -140, 1, -36)\n`;
+        lua += `ContentWindow.Position = UDim2.new(0, 140, 0, 36)\n`;
+        lua += `ContentWindow.BackgroundTransparency = 1\n`;
+        lua += `ContentWindow.Parent = MainFrame\n\n`;
+
         uiProject.tabs.forEach((t, tIdx) => {
-            lua += `-- Tab: ${t.name}\n`;
+            let tabContainerName = `TabContent_${tIdx}`;
+            lua += `-- Tab Framework Node Structure: [ ${t.name} ]\n`;
+            lua += `local ${tabContainerName} = Instance.new("ScrollingFrame")\n`;
+            lua += `${tabContainerName}.Size = UDim2.new(1, 0, 1, 0)\n`;
+            lua += `${tabContainerName}.BackgroundTransparency = 1\n`;
+            lua += `${tabContainerName}.Visible = ${tIdx === 0 ? "true" : "false"}\n`;
+            lua += `${tabContainerName}.ScrollBarThickness = 4\n`;
+            lua += `${tabContainerName}.Parent = ContentWindow\n\n`;
+
+            lua += `local ListLayout_${tIdx} = Instance.new("UIListLayout")\n`;
+            lua += `ListLayout_${tIdx}.Padding = UDim.new(0, 6)\n`;
+            lua += `ListLayout_${tIdx}.Parent = ${tabContainerName}\n\n`;
+
+            lua += `local TabBtn_${tIdx} = Instance.new("TextButton")\n`;
+            lua += `TabBtn_${tIdx}.Size = UDim2.new(1, 0, 0, 32)\n`;
+            lua += `TabBtn_${tIdx}.Text = "${t.name}"\n`;
+            lua += `TabBtn_${tIdx}.TextColor3 = Color3.fromRGB(241, 245, 249)\n`;
+            lua += `TabBtn_${tIdx}.BackgroundTransparency = 1\n`;
+            lua += `TabBtn_${tIdx}.Parent = Sidebar\n\n`;
+
             t.elements.forEach((e, eIdx) => {
+                let elemName = `Elem_${tIdx}_${eIdx}`;
                 if (e.type === 'button') {
-                    lua += `local Btn_${tIdx}_${eIdx} = Instance.new("TextButton")\n`;
-                    lua += `Btn_${tIdx}_${eIdx}.Text = "${e.name}"\n`;
-                    lua += `Btn_${tIdx}_${eIdx}.Parent = MainFrame\n`;
-                    lua += `Btn_${tIdx}_${eIdx}.MouseButton1Click:Connect(function()\n`;
+                    lua += `local ${elemName} = Instance.new("TextButton")\n`;
+                    lua += `${elemName}.Size = UDim2.new(1, -12, 0, 36)\n`;
+                    lua += `${elemName}.Text = "${e.name}"\n`;
+                    lua += `${elemName}.BackgroundColor3 = Color3.fromRGB(28, 28, 46)\n`;
+                    lua += `${elemName}.TextColor3 = Color3.fromRGB(241, 245, 249)\n`;
+                    lua += `${elemName}.Parent = ${tabContainerName}\n`;
+                    lua += `${elemName}.MouseButton1Click:Connect(function()\n`;
                     lua += `    ${e.code.replace(/\n/g, '\n    ')}\n`;
+                    lua += `end)\n\n`;
+                } else if (e.type === 'toggle') {
+                    lua += `local ${elemName}State = false\n`;
+                    lua += `local ${elemName} = Instance.new("TextButton")\n`;
+                    lua += `${elemName}.Size = UDim2.new(1, -12, 0, 36)\n`;
+                    lua += `${elemName}.Text = "${e.name}: OFF"\n`;
+                    lua += `${elemName}.BackgroundColor3 = Color3.fromRGB(28, 28, 46)\n`;
+                    lua += `${elemName}.TextColor3 = Color3.fromRGB(241, 245, 249)\n`;
+                    lua += `${elemName}.Parent = ${tabContainerName}\n`;
+                    lua += `${elemName}.MouseButton1Click:Connect(function()\n`;
+                    lua += `    ${elemName}State = not ${elemName}State\n`;
+                    lua += `    ${elemName}.Text = "${e.name}: " .. (${elemName}State and "ON" or "OFF")\n`;
+                    lua += `    task.spawn(function()\n`;
+                    lua += `        if ${elemName}State then\n`;
+                    lua += `            ${e.code.replace(/\n/g, '\n            ')}\n`;
+                    lua += `        end\n`;
+                    lua += `    end)\n`;
                     lua += `end)\n\n`;
                 }
             });
