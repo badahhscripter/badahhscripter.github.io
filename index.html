@@ -162,6 +162,8 @@
             backdrop-filter: blur(8px);
         }
 
+        .workspace-overlay.open { display: block; }
+
         .wrapper {
             max-width: 900px;
             margin: 40px auto;
@@ -217,22 +219,13 @@
         .rating-stars span.selected { color: var(--premium-gold); text-shadow: 0 0 10px rgba(245,158,11,0.5); }
 
         .admin-block { background: #090a0f; border: 1px solid var(--border); border-radius: var(--ui-corner); padding: 20px; margin-bottom: 20px; }
-        .admin-preview { 
-            background: #040508; padding: 12px; border-radius: var(--ui-corner);
-            border: 1px solid var(--border); font-family: monospace; color: #10b981; max-height: 120px; 
-            overflow-y: auto; white-space: pre-wrap; margin: 10px 0;
-        }
-
+        
         .notify-item { 
             padding: 12px; border-radius: var(--ui-corner); border-left: 4px solid var(--accent); 
             background: #141724; font-size: 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
         }
-        .notify-item.success { border-left-color: var(--success); }
-        .notify-item.error { border-left-color: var(--error); }
-        .notify-item.warn { border-left-color: var(--premium-gold); }
 
         .pop-image-banner { width: 100%; max-height: 240px; object-fit: cover; border-radius: var(--ui-corner); margin-bottom: 20px; border: 1px solid var(--border); }
-        
         .file-upload-wrapper { display: flex; flex-direction: column; gap: 8px; }
     </style>
 </head>
@@ -356,7 +349,7 @@
         </div>                  
         <div style="display:flex; gap:12px; margin:25px 0;">             
             <button id="popLikeBtn" onclick="likeCurrentScript()" class="action-btn like-btn">👍 Upvote Asset</button>             
-            <button id="mainActionBtn" class="action-btn copy-btn">📋 Copy Script Code</button>         
+            <button id="mainActionBtn" onclick="copyOrDownloadPayload()" class="action-btn copy-btn">📋 Copy Script Code</button>         
         </div>          
         <div style="background:#090a0f; border:1px solid var(--border); padding:20px; border-radius:12px; margin-bottom:25px;">             
             <h4 style="margin:0 0 10px 0; color:var(--premium-gold);">⭐ Cast Performance Evaluation</h4>             
@@ -428,7 +421,7 @@
                 masterList.push(d); 
             }); 
         }         
-        filterFeed(posts);                 
+        filterFeed();                  
         if(auth.currentUser) {             
             loadUserAssetQueue(auth.currentUser.uid);            
             if(isAdminUser) renderOwnerAdminPanels();         
@@ -516,14 +509,12 @@
         
         if(!t || !d || !c) return alert("Fill all elements.");
 
-        let base64Image = "";
-        
         const proceedSubmission = (imgData) => {
             let targetStatus = (type === 'executor' || isAdminUser) ? 'approved' : 'pending';
             rtdb.ref('scripts').push({             
                 type: type, title: t, description: d, code: c, imageUrl: imgData,
-                submittedBy: localStorage.getItem('hub_username'),             
-                userId: auth.currentUser.uid, status: targetStatus,             
+                submittedBy: localStorage.getItem('hub_username') || 'Anonymous',             
+                userId: auth.currentUser ? auth.currentUser.uid : 'anon', status: targetStatus,             
                 views: 0, upvotes: 0, copiedCount: 0, totalRatings: 0, sumRatings: 0, timestamp: Date.now()         
             }).then(() => {             
                 alert(targetStatus === 'approved' ? "Asset published successfully!" : "Submitted for Owner Verification!");             
@@ -543,6 +534,286 @@
             reader.readAsDataURL(fileInput.files[0]);
         } else {
             proceedSubmission("");
+        }
+    }
+
+    // FEED FILTER & RENDER ENGINE
+    function filterFeed() {
+        const searchQuery = (document.getElementById('searchBar').value || '').toLowerCase();
+        const category = document.getElementById('categoryFilter').value;
+        const sortBy = document.getElementById('sortFilter').value;
+
+        let filtered = masterList.filter(item => {
+            if (item.status !== 'approved') return false;
+
+            const matchesSearch = (item.title || '').toLowerCase().includes(searchQuery) || 
+                                  (item.description || '').toLowerCase().includes(searchQuery);
+            const matchesCategory = category === 'all' || item.type === category;
+
+            return matchesSearch && matchesCategory;
+        });
+
+        if (sortBy === 'newest') {
+            filtered.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        } else if (sortBy === 'likes') {
+            filtered.sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0));
+        }
+
+        renderFeed(filtered);
+    }
+
+    function renderFeed(items) {
+        const feedList = document.getElementById('feedList');
+        
+        if (!items || items.length === 0) {
+            feedList.innerHTML = '<div style="color:var(--muted); text-align:center; padding: 20px;">No published assets found.</div>';
+            return;
+        }
+
+        feedList.innerHTML = items.map(item => `
+            <div class="feed-card" onclick="openWorkspace('${item.id}')">
+                ${item.imageUrl ? `<img src="${item.imageUrl}" class="card-preview-img" alt="Preview">` : ''}
+                <div class="card-body-content">
+                    <div class="card-header">
+                        <h3 style="margin:0; color:var(--accent);">${item.title}</h3>
+                        <span style="font-size:12px; padding:4px 8px; background:#141724; border-radius:4px; color:var(--muted); text-transform:uppercase;">${item.type}</span>
+                    </div>
+                    <p style="margin:8px 0; font-size:14px; color:#cbd5e1;">${item.description}</p>
+                    <div class="card-meta">
+                        <span>👤 ${item.submittedBy || 'Anonymous'}</span>
+                        <span>👍 ${item.upvotes || 0} Likes</span>
+                        <span>👁️ ${item.views || 0} Views</span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // WORKSPACE MODAL POPUP ENGINE
+    function openWorkspace(id) {
+        const scriptData = masterList.find(x => x.id === id);
+        if(!scriptData) return;
+
+        activeScriptId = id;
+        
+        // Register View Count
+        rtdb.ref(`scripts/${id}/views`).transaction(views => (views || 0) + 1);
+
+        document.getElementById('popTitle').innerText = scriptData.title;
+        document.getElementById('popAuthor').innerText = `Published by: ${scriptData.submittedBy || 'Anonymous'}`;
+        document.getElementById('popDesc').innerText = scriptData.description;
+        document.getElementById('popCode').innerText = scriptData.code;
+
+        const imgBanner = document.getElementById('popImageBanner');
+        if(scriptData.imageUrl) {
+            imgBanner.src = scriptData.imageUrl;
+            imgBanner.classList.remove('hidden');
+        } else {
+            imgBanner.classList.add('hidden');
+        }
+
+        const mainBtn = document.getElementById('mainActionBtn');
+        if(scriptData.type === 'executor') {
+            mainBtn.className = "action-btn download-btn";
+            mainBtn.innerText = "⚡ Download Executor Payload";
+        } else {
+            mainBtn.className = "action-btn copy-btn";
+            mainBtn.innerText = "📋 Copy Script Code";
+        }
+
+        updateOverlayMetricsUI(scriptData);
+        checkUserInteractions(id);
+
+        const overlay = document.getElementById('workspaceOverlay');
+        overlay.style.display = 'block';
+        setTimeout(() => overlay.classList.add('open'), 10);
+    }
+
+    function closeWorkspace() {
+        const overlay = document.getElementById('workspaceOverlay');
+        overlay.classList.remove('open');
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            activeScriptId = null;
+        }, 300);
+    }
+
+    function updateOverlayMetricsUI(data) {
+        const avg = data.totalRatings ? (data.sumRatings / data.totalRatings).toFixed(1) : '0.0';
+        document.getElementById('popMetrics').innerText = 
+            `👁️ ${data.views || 0} Views | 👍 ${data.upvotes || 0} Likes | 📋 ${data.copiedCount || 0} Downloads | ⭐ ${avg} Rating`;
+    }
+
+    function copyOrDownloadPayload() {
+        if(!activeScriptId) return;
+        const scriptData = masterList.find(x => x.id === activeScriptId);
+        if(!scriptData) return;
+
+        rtdb.ref(`scripts/${activeScriptId}/copiedCount`).transaction(c => (c || 0) + 1);
+
+        if(scriptData.type === 'executor') {
+            window.open(scriptData.code, '_blank');
+        } else {
+            navigator.clipboard.writeText(scriptData.code).then(() => {
+                alert("Lua payload copied to clipboard!");
+            });
+        }
+    }
+
+    function likeCurrentScript() {
+        if(!auth.currentUser) return alert("Please log in to like assets.");
+        if(!activeScriptId) return;
+
+        const userUid = auth.currentUser.uid;
+        const likeRef = rtdb.ref(`userLikes/${userUid}/${activeScriptId}`);
+
+        likeRef.once('value', sn => {
+            if(sn.exists()) {
+                likeRef.remove();
+                rtdb.ref(`scripts/${activeScriptId}/upvotes`).transaction(v => Math.max(0, (v || 1) - 1));
+            } else {
+                likeRef.set(true);
+                rtdb.ref(`scripts/${activeScriptId}/upvotes`).transaction(v => (v || 0) + 1);
+            }
+        });
+    }
+
+    function checkUserInteractions(scriptId) {
+        if(!auth.currentUser) return;
+        
+        // Like Button status
+        rtdb.ref(`userLikes/${auth.currentUser.uid}/${scriptId}`).once('value', sn => {
+            const btn = document.getElementById('popLikeBtn');
+            if(sn.exists()) {
+                btn.innerText = "💔 Unlike Asset";
+                btn.style.background = "#64748b";
+            } else {
+                btn.innerText = "👍 Upvote Asset";
+                btn.style.background = "var(--error)";
+            }
+        });
+
+        // User Rating status
+        rtdb.ref(`userRatings/${auth.currentUser.uid}/${scriptId}`).once('value', sn => {
+            const val = sn.val() || 0;
+            highlightStars(val);
+            document.getElementById('userRatingNotice').innerText = val ? `Your active rating: ${val} ★` : "Select stars to submit data.";
+        });
+    }
+
+    function highlightStars(val) {
+        document.querySelectorAll('#starContainer span').forEach(s => {
+            if(parseInt(s.dataset.value) <= val) s.classList.add('selected');
+            else s.classList.remove('selected');
+        });
+    }
+
+    function submitRating(val) {
+        if(!auth.currentUser) return alert("Sign in to submit rating.");
+        if(!activeScriptId) return;
+
+        const uid = auth.currentUser.uid;
+        const ratingRef = rtdb.ref(`userRatings/${uid}/${activeScriptId}`);
+
+        ratingRef.once('value', sn => {
+            const oldVal = sn.val();
+            ratingRef.set(val).then(() => {
+                highlightStars(val);
+                rtdb.ref(`scripts/${activeScriptId}`).transaction(s => {
+                    if(!s) return s;
+                    if(oldVal) {
+                        s.sumRatings = (s.sumRatings || 0) - oldVal + val;
+                    } else {
+                        s.totalRatings = (s.totalRatings || 0) + 1;
+                        s.sumRatings = (s.sumRatings || 0) + val;
+                    }
+                    return s;
+                });
+            });
+        });
+    }
+
+    // USER DASHBOARD & ADMIN PANEL LOGIC
+    function loadUserAssetQueue(uid) {
+        const queueBox = document.getElementById('userLibraryQueue');
+        const userItems = masterList.filter(x => x.userId === uid);
+
+        if(userItems.length === 0) {
+            queueBox.innerHTML = '<div style="color:var(--muted);">No historical listings found.</div>';
+            return;
+        }
+
+        queueBox.innerHTML = userItems.map(item => `
+            <div class="comment-box">
+                <div>
+                    <strong>${item.title}</strong> [${item.type.toUpperCase()}]
+                    <div style="font-size:12px; color:var(--muted);">Status: <span style="color:${item.status === 'approved' ? 'var(--success)' : 'var(--premium-gold)'};">${item.status.toUpperCase()}</span></div>
+                </div>
+                <button onclick="deleteScript('${item.id}')" style="background:var(--error); border:none; padding:6px 12px; border-radius:6px; color:#fff; cursor:pointer;">Delete</button>
+            </div>
+        `).join('');
+    }
+
+    function renderOwnerAdminPanels() {
+        const pendingBox = document.getElementById('adminPendingContainer');
+        const approvedBox = document.getElementById('adminApprovedContainer');
+
+        const pending = masterList.filter(x => x.status === 'pending');
+        const approved = masterList.filter(x => x.status === 'approved');
+
+        pendingBox.innerHTML = pending.length ? pending.map(item => `
+            <div class="comment-box">
+                <div>
+                    <strong>${item.title}</strong> by ${item.submittedBy}
+                    <div style="font-size:12px; color:var(--muted);">${item.description}</div>
+                </div>
+                <div style="display:flex; gap:6px;">
+                    <button onclick="setScriptStatus('${item.id}', 'approved')" style="background:var(--success); border:none; padding:6px 12px; border-radius:6px; color:#000; font-weight:bold; cursor:pointer;">Approve</button>
+                    <button onclick="deleteScript('${item.id}')" style="background:var(--error); border:none; padding:6px 12px; border-radius:6px; color:#fff; cursor:pointer;">Reject</button>
+                </div>
+            </div>
+        `).join('') : '<div style="color:var(--muted);">No submissions requiring verification.</div>';
+
+        approvedBox.innerHTML = approved.length ? approved.map(item => `
+            <div class="comment-box">
+                <div>
+                    <strong>${item.title}</strong>
+                    <div style="font-size:12px; color:var(--muted);">👍 ${item.upvotes || 0} Likes | 👁️ ${item.views || 0} Views</div>
+                </div>
+                <button onclick="deleteScript('${item.id}')" style="background:var(--error); border:none; padding:6px 12px; border-radius:6px; color:#fff; cursor:pointer;">Remove</button>
+            </div>
+        `).join('') : '<div style="color:var(--muted);">No active catalog listings.</div>';
+    }
+
+    function setScriptStatus(id, status) {
+        rtdb.ref(`scripts/${id}/status`).set(status);
+    }
+
+    function deleteScript(id) {
+        if(confirm("Confirm deletion of this item?")) {
+            rtdb.ref(`scripts/${id}`).remove();
+        }
+    }
+
+    function listenToNotifications(uid) {
+        rtdb.ref(`notifications/${uid}`).on('value', sn => {
+            const box = document.getElementById('notificationsBox');
+            if(!sn.exists()) {
+                box.innerHTML = 'No active notifications.';
+                return;
+            }
+            let html = '';
+            sn.forEach(c => {
+                let n = c.val();
+                html += `<div class="notify-item ${n.type || ''}">${n.message}</div>`;
+            });
+            box.innerHTML = html;
+        });
+    }
+
+    function clearMyNotifications() {
+        if(auth.currentUser) {
+            rtdb.ref(`notifications/${auth.currentUser.uid}`).remove();
         }
     }
 </script>
