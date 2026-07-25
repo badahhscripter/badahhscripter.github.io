@@ -1,672 +1,946 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
+    <title>BadahhScripts</title>
+    <link rel="icon" type="image/png" href="favicon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Badahhscripts</title>
-    <link rel="icon" type="image/png" href="favicon.png">
+    <title>Asset & Script Repository</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <style>
-        :root {
-            --bg: #07080c;
-            --card: #0f111a;
-            --accent: #00a2ff;
-            --accent-glow: rgba(0, 162, 255, 0.3);
-            --text: #ffffff;
-            --muted: #64748b;
-            --border: #1e293b;
+        :root[data-theme="dark"] {
+            --bg: #0b0f19;
+            --card: #111827;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --border: #1f2937;
+            --input-bg: #030712;
             --success: #10b981;
-            --error: #ef4444;
-            --premium-gold: #f59e0b;
-            --ui-corner: 14px;
+            --danger: #ef4444;
+            --gold: #f59e0b;
+            --maker-panel: #14141f;
+            --maker-preview: #09090d;
         }
+
+        :root[data-theme="light"] {
+            --bg: #f3f4f6;
+            --card: #ffffff;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --input-bg: #f9fafb;
+            --success: #059669;
+            --danger: #dc2626;
+            --gold: #d97706;
+            --maker-panel: #e5e7eb;
+            --maker-preview: #cbd5e1;
+        }
+
+        * { box-sizing: border-box; }
 
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg);
-            color: var(--text);
+            color: var(--text-main);
             margin: 0;
-            padding: 15px;
-            opacity: 0;
-            animation: fadeInBody 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            padding: 16px;
+            transition: background 0.2s ease, color 0.2s ease;
         }
-
-        @keyframes fadeInBody { to { opacity: 1; } }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
             background: var(--card);
-            padding: 25px;
-            border-radius: var(--ui-corner);
+            padding: 24px;
+            border-radius: 12px;
             border: 1px solid var(--border);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.7);
         }
 
-        .hidden { display: none !important; }
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .brand-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        .theme-toggle-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
 
         .tab-navigation {
             display: flex;
-            gap: 12px;
-            margin-bottom: 25px;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 15px;
-            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+            overflow-x: auto;
         }
 
         .nav-btn {
-            background: #141724;
+            background: transparent;
             border: 1px solid var(--border);
-            color: var(--muted);
-            padding: 14px 24px;
-            border-radius: var(--ui-corner);
+            color: var(--text-muted);
+            padding: 10px 18px;
+            border-radius: 6px;
             cursor: pointer;
-            font-weight: 700;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-            flex-grow: 1;
-            text-align: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            transition: all 0.2s ease;
         }
 
         .nav-btn:hover {
-            color: #fff;
+            color: var(--text-main);
             border-color: var(--accent);
-            background: #1c2033;
-            transform: translateY(-2px);
         }
 
         .nav-btn.active {
             background: var(--accent);
             border-color: var(--accent);
-            color: #fff;
-            box-shadow: 0 0 20px var(--accent-glow);
+            color: #ffffff;
         }
 
-        .admin-nav { border-color: var(--premium-gold); color: var(--premium-gold); }
-        .admin-nav:hover { border-color: var(--premium-gold); background: rgba(245,158,11,0.1); }
-        .admin-nav.active { background: var(--premium-gold); color: #000; box-shadow: 0 0 20px rgba(245,158,11,0.4); }
+        .admin-nav { border-color: var(--gold); color: var(--gold); }
+        .admin-nav.active { background: var(--gold); color: #000000; }
 
-        .controls-row { display: flex; gap: 12px; margin-bottom: 25px; flex-wrap: wrap; }
-        .search-box { flex: 1; min-width: 200px; }
-        
-        input, textarea, select { 
-            padding: 14px; 
-            background: #0b0d14;
-            border: 1px solid var(--border); 
-            border-radius: var(--ui-corner); 
-            color: #fff; 
-            font-size: 14px; 
-            box-sizing: border-box; 
-            transition: all 0.2s ease;
+        .hidden { display: none !important; }
+
+        .controls-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
-        input:focus, textarea:focus, select:focus { 
-            border-color: var(--accent); 
+
+        .search-box { flex: 2; min-width: 200px; }
+        .filter-select { flex: 1; min-width: 140px; }
+
+        input, textarea, select {
+            padding: 10px 14px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-main);
+            font-size: 0.875rem;
+            width: 100%;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--accent);
             outline: none;
-            box-shadow: 0 0 10px rgba(0,162,255,0.15); 
         }
 
         .feed-card {
-            background: #090a0f;
+            background: var(--input-bg);
             border: 1px solid var(--border);
-            padding: 24px;
-            margin-bottom: 15px;
-            border-radius: var(--ui-corner);
+            padding: 18px;
+            margin-bottom: 12px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-            animation: slideUpCard 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
             display: flex;
-            gap: 20px;
-            align-items: flex-start;
+            gap: 16px;
+            transition: border-color 0.2s ease;
+        }
+
+        .feed-card:hover { border-color: var(--accent); }
+
+        .card-preview-img {
+            width: 90px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            flex-shrink: 0;
         }
 
         .card-body-content { flex: 1; }
 
-        .card-preview-img {
-            width: 120px;
-            height: 120px;
-            object-fit: cover;
-            border-radius: calc(var(--ui-corner) - 4px);
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .category-badge {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            background: var(--card);
             border: 1px solid var(--border);
-            background: #141724;
+            border-radius: 4px;
+            color: var(--text-muted);
+            text-transform: uppercase;
         }
 
-        @keyframes slideUpCard {
-            from { opacity: 0; transform: translateY(12px); }
-            to { opacity: 1; transform: translateY(0); }
+        .desc-text {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            margin: 6px 0;
         }
 
-        .feed-card:hover {
-            transform: translateY(-3px);
-            border-color: var(--accent);
-            box-shadow: 0 12px 24px rgba(0,162,255,0.12);
+        .show-more-btn {
+            background: none;
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            padding: 0;
+            font-size: 0.8125rem;
+            font-weight: 600;
         }
 
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-        .card-meta { 
-            display: flex; gap: 15px; font-size: 13px; color: var(--muted); 
-            margin-top: 15px; padding-top: 12px; border-top: 1px solid #141724; flex-wrap: wrap; 
+        .card-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap;
         }
 
         .workspace-overlay {
             display: none;
             position: fixed;
-            top:0; left:0; width:100%; height:100%;
-            background: rgba(4,5,8,0.95);
-            z-index:9999;
-            overflow-y:auto;
-            padding: 20px;
-            box-sizing: border-box;
-            backdrop-filter: blur(8px);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 999;
+            overflow-y: auto;
+            padding: 16px;
         }
 
         .workspace-overlay.open { display: block; }
 
         .wrapper {
-            max-width: 900px;
-            margin: 40px auto;
+            max-width: 800px;
+            margin: 30px auto;
             background: var(--card);
-            padding: 40px;
-            border-radius: var(--ui-corner);
+            padding: 28px;
+            border-radius: 10px;
             border: 1px solid var(--border);
-            transform: scale(0.95);
-            opacity: 0;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .workspace-overlay.open .wrapper {
-            transform: scale(1);
-            opacity: 1;
+        pre {
+            background: var(--input-bg);
+            padding: 16px;
+            border-radius: 6px;
+            color: var(--success);
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 0.8125rem;
+            max-height: 250px;
+            border: 1px solid var(--border);
         }
 
-        pre { 
-            background: #05060a; padding: 20px; border-radius: var(--ui-corner);
-            color: #10b981; overflow-x: auto; font-family: 'Consolas', monospace; font-size: 13px; 
-            max-height: 300px; border: 1px solid #141724;
+        .action-btn {
+            padding: 10px 20px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            transition: opacity 0.2s ease;
         }
 
-        .action-btn { 
-            padding: 14px 28px; font-weight: 800; font-size: 14px; text-transform: uppercase; 
-            letter-spacing: 0.5px; border-radius: var(--ui-corner); cursor: pointer; border: none; 
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex: 1; 
-            transition: all 0.2s ease; user-select: none;
-        }
-        .action-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
-        .action-btn:active { transform: translateY(1px); }
-        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; filter: none !important; }
-        
-        .like-btn { background: var(--error); color: white; }
-        .copy-btn { background: var(--accent); color: white; }
-        .download-btn { background: var(--success); color: #000; font-weight: bold; }
-        .submit-btn { background: var(--success); color: #000; width: 100%; }
+        .action-btn:hover { opacity: 0.9; }
+        .like-btn { background: var(--danger); color: #ffffff; }
+        .copy-btn { background: var(--accent); color: #ffffff; }
+        .follow-btn { background: var(--card); border: 1px solid var(--border); color: var(--text-main); }
 
-        .profile-badge { 
-            display: flex; align-items: center; gap: 12px; background: #090a0f;
-            padding: 14px 20px; border-radius: var(--ui-corner); margin-bottom: 25px; border: 1px solid var(--border);
-        }
-        .comment-box { 
-            background: #090a0f; padding: 16px; border-radius: var(--ui-corner); margin-bottom: 12px;
-            border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 10px;
-            transition: transform 0.2s ease;
-        }
-        .comment-box:hover { transform: translateX(4px); }
-
-        .rating-stars { display: inline-flex; gap: 6px; margin-bottom: 15px; font-size: 28px; color: var(--muted); cursor: pointer; }
-        .rating-stars span { transition: color 0.2s ease, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .rating-stars span:hover { transform: scale(1.3); color: var(--premium-gold); }
-        .rating-stars span.selected { color: var(--premium-gold); text-shadow: 0 0 10px rgba(245,158,11,0.5); }
-
-        .admin-block { background: #090a0f; border: 1px solid var(--border); border-radius: var(--ui-corner); padding: 20px; margin-bottom: 20px; }
-        
-        .notify-item { 
-            padding: 12px; border-radius: var(--ui-corner); border-left: 4px solid var(--accent); 
-            background: #141724; font-size: 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
+        .profile-badge {
+            background: var(--input-bg);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
-        .pop-image-banner { width: 100%; max-height: 240px; object-fit: cover; border-radius: var(--ui-corner); margin-bottom: 20px; border: 1px solid var(--border); }
-        .file-upload-wrapper { display: flex; flex-direction: column; gap: 8px; }
+        .rating-stars { display: inline-flex; gap: 4px; font-size: 24px; color: var(--text-muted); cursor: pointer; }
+        .rating-stars span.selected { color: var(--gold); }
+
+        /* SCRIPT/UI MAKER PANEL STYLES */
+        .workspace-wrapper {
+            display: grid;
+            grid-template-columns: 280px 1fr 340px;
+            width: 100%;
+            height: 650px;
+            background: var(--bg);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .column {
+            background: var(--maker-panel);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .column-header {
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .scrollable-body { flex: 1; overflow-y: auto; padding: 16px; }
+
+        .control-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+
+        .btn-action {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .btn-action:hover { border-color: var(--accent); }
+
+        .tree-container { display: flex; flex-direction: column; gap: 4px; margin-bottom: 20px; }
+
+        .tree-node {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .tree-node:hover { background: rgba(255, 255, 255, 0.05); }
+        .tree-node.active { background: var(--accent); color: #ffffff; font-weight: 600; }
+
+        .center-workspace { display: flex; flex-direction: column; background: var(--maker-preview); }
+        .preview-area { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; overflow: auto; }
+
+        .rbx-window {
+            background: #12121c;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            color: #ffffff;
+        }
+
+        .rbx-topbar {
+            background: #181826;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .rbx-main-body { display: grid; grid-template-columns: 130px 1fr; flex: 1; }
+        .rbx-sidebar { background: #0e0e16; border-right: 1px solid rgba(255, 255, 255, 0.04); padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+
+        .rbx-tab-btn { padding: 6px 10px; border-radius: 4px; font-size: 11px; color: #94a3b8; cursor: pointer; }
+        .rbx-tab-btn.active { background: rgba(255, 255, 255, 0.1); color: white; font-weight: 600; }
+
+        .rbx-content { background: #13131f; padding: 14px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
+        .rbx-ui-button { background: #1c1c2e; border: 1px solid rgba(255, 255, 255, 0.05); padding: 8px; border-radius: 4px; font-size: 12px; color: #e2e8f0; }
+        .rbx-ui-toggle { background: #1c1c2e; padding: 8px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+
+        .code-output-column { background: var(--input-bg); border-left: 1px solid var(--border); }
+        .code-display {
+            flex: 1; width: 100%; height: 100%; background: var(--input-bg);
+            color: var(--success); border: none; padding: 14px; font-family: monospace; font-size: 11px; outline: none; resize: none;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 850px) {
+            .workspace-wrapper { grid-template-columns: 1fr; height: auto; }
+            .column { height: 350px; }
+        }
+
+        @media (max-width: 640px) {
+            body { padding: 8px; }
+            .container { padding: 14px; }
+            .feed-card { flex-direction: column; }
+            .card-preview-img { width: 100%; height: 140px; }
+            .controls-row { flex-direction: column; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <div class="header-bar">
+        <div class="brand-title">Asset Index</div>
+        <button class="theme-toggle-btn" onclick="toggleTheme()">Theme Mode</button>
+    </div>
+
     <div class="tab-navigation">
-        <button id="tabFeed" class="nav-btn active" onclick="switchView('feed-view')">🌐 Explore Catalog</button>
-        <button id="tabSubmit" class="nav-btn" onclick="switchView('submit-view')">📝 Submit Asset</button>
-        <button id="tabAccount" class="nav-btn" onclick="switchView('account-view')">👤 Creator Profile</button>
-        <button id="tabAdmin" class="nav-btn admin-nav hidden" onclick="switchView('admin-view')">🛡️ Management Core</button>
+        <button id="tabFeed" class="nav-btn active" onclick="switchView('feed-view')">Catalog</button>
+        <button id="tabMaker" class="nav-btn" onclick="switchView('maker-view')">UI Maker</button>
+        <button id="tabSubmit" class="nav-btn" onclick="switchView('submit-view')">Submit Script</button>
+        <button id="tabAccount" class="nav-btn" onclick="switchView('account-view')">Profile</button>
+        <button id="tabAdmin" class="nav-btn admin-nav hidden" onclick="switchView('admin-view')">Management</button>
     </div>
 
     <div id="loggedUserBadge" class="profile-badge hidden">
-        <div style="font-size:14px;">Welcome back, <strong id="headerUsername" style="color:var(--accent);">--</strong></div>
-        <button onclick="logoutUser()" style="margin-left:auto; padding:8px 16px; background:var(--error); font-size:12px; border-radius:6px; color:#fff; border:none; font-weight:bold; cursor:pointer;">Sign Out</button>
+        <div>
+            User: <strong id="headerUsername" style="color:var(--accent);">--</strong>
+            <div id="userStats" style="font-size:0.8125rem; color:var(--text-muted); margin-top:4px;">Followers: 0 | Following: 0</div>
+        </div>
+        <button onclick="logoutUser()" class="action-btn" style="background:var(--danger); color:#fff;">Sign Out</button>
     </div>
 
     <div id="view-feed-view" class="view-panel">
         <div class="controls-row">
-            <input type="text" id="searchBar" class="search-box" placeholder="🔍 Search catalogue..." oninput="filterFeed()">
-            <select id="categoryFilter" onchange="filterFeed()">
-                <option value="all">📁 All Categories</option>
-                <option value="script">📜 Scripts Only</option>
-                <option value="executor">⚙️ Executors Only</option>
+            <input type="text" id="searchBar" class="search-box" placeholder="Search catalog..." oninput="filterFeed()">
+            <select id="categoryFilter" class="filter-select" onchange="filterFeed()">
+                <option value="all">All Categories</option>
+                <option value="script">Scripts</option>
+                <option value="executor">Executors</option>
+                <option value="admin">Admin Tools</option>
+                <option value="combat">Combat</option>
+                <option value="visuals">Visuals</option>
+                <option value="utility">Utility</option>
             </select>
             <select id="sortFilter" class="filter-select" onchange="filterFeed()">
-                <option value="newest">🕒 Newest Uploads</option>
-                <option value="likes">👍 Most Liked</option>
+                <option value="newest">Newest Uploads</option>
+                <option value="likes">Most Liked</option>
             </select>
         </div>
         <div id="feedList">Synchronizing index logs...</div>
     </div>
 
+    <div id="view-maker-view" class="view-panel hidden">
+        <div style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0;">Interactive UI / Luau Script Builder</h3>
+            <button onclick="exportMakerCodeToSubmit()" class="action-btn copy-btn" style="font-size:0.8125rem; padding:6px 14px;">Export to Submit Tab</button>
+        </div>
+
+        <div class="workspace-wrapper">
+            <div class="column">
+                <div class="column-header">UI Layout Creator</div>
+                <div class="scrollable-body">
+                    <div class="control-grid">
+                        <button class="btn-action" onclick="addTab()">Add Tab Section <span>+</span></button>
+                        <button class="btn-action" onclick="addElement('button')">Add Action Button <span>+</span></button>
+                        <button class="btn-action" onclick="addElement('toggle')">Add Loop Toggle <span>+</span></button>
+                    </div>
+
+                    <div class="column-header" style="padding:8px 0; background:none; border:none; margin-bottom:4px;">Interface Tree</div>
+                    <div class="tree-container">
+                        <div class="tree-node" id="rootNode" onclick="selectTarget('global', 'global')">Main Window Settings</div>
+                        <div id="hierarchyTree"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column center-workspace">
+                <div class="column-header">Interactive Layout Preview</div>
+                
+                <div class="preview-area">
+                    <div class="rbx-window" id="previewWindow">
+                        <div class="rbx-topbar">
+                            <div class="rbx-title" id="previewTitle" style="color: var(--accent);">Executor Premium</div>
+                            <div style="color:var(--danger); font-weight:bold; cursor:pointer;">✕</div>
+                        </div>
+                        <div class="rbx-main-body">
+                            <div class="rbx-sidebar" id="previewTabs"></div>
+                            <div class="rbx-content" id="previewContent"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="column" style="height:240px; border-top:1px solid var(--border); border-right:none;">
+                    <div class="column-header" id="inspectorTitle">Properties Inspector</div>
+                    <div class="scrollable-body">
+                        <div id="noSelectionMessage" style="color:var(--text-muted); font-size:12px; text-align:center;">Select a layout asset to modify properties.</div>
+                        
+                        <div id="inspectorForm" style="display:none; flex-direction:column; gap:10px;">
+                            <div>
+                                <label style="font-size:11px; color:var(--text-muted);" id="labelName">Display Text Label</label>
+                                <input type="text" id="propName" oninput="updateProperties()">
+                            </div>
+
+                            <div id="globalDimensionsRow" style="display:none; gap:8px;">
+                                <div>
+                                    <label style="font-size:11px; color:var(--text-muted);">Width</label>
+                                    <input type="number" id="propWidth" oninput="updateProperties()">
+                                </div>
+                                <div>
+                                    <label style="font-size:11px; color:var(--text-muted);">Height</label>
+                                    <input type="number" id="propHeight" oninput="updateProperties()">
+                                </div>
+                            </div>
+
+                            <div id="globalColorRow" style="display:none;">
+                                <label style="font-size:11px; color:var(--text-muted);">Accent Branding Color</label>
+                                <input type="color" id="propColor" style="height:35px; padding:0;" oninput="updateProperties()">
+                            </div>
+
+                            <div id="codeActionRow" style="display:none; flex-direction:column;">
+                                <label style="font-size:11px; color:var(--text-muted);">Luau Execution Script</label>
+                                <textarea id="propCode" style="height:70px; font-family:monospace; resize:none;" spellcheck="false" oninput="updateProperties()"></textarea>
+                            </div>
+
+                            <div id="deleteBtnRow">
+                                <button class="action-btn like-btn" style="width:100%; padding:6px;" onclick="deleteSelected()">Delete Element</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column code-output-column">
+                <div class="column-header">Compiled Luau Code</div>
+                <textarea id="luauCodeBox" class="code-display" readonly spellcheck="false"></textarea>
+                <div style="padding:10px; border-top:1px solid var(--border);">
+                    <button class="action-btn copy-btn" style="width:100%;" onclick="copyLuauScript()">Copy Roblox Script</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="view-submit-view" class="view-panel hidden">
-        <h3>📝 Publish an Executable Asset</h3>
+        <h3>Publish an Asset</h3>
         <div id="submitFormFields">
-            <div class="input-group" style="margin-bottom:15px;">   
-                <label>Asset Type</label>
-                <select id="submitType" style="width:100%; margin-top:5px;">
-                    <option value="script">📜 Script Payload (Open to Everyone)</option>
-                    <option value="executor" id="submitTypeExecutorOpt">⚙️ System Executor (Owner Only)</option>
+            <div style="margin-bottom:12px;">
+                <label style="font-size:0.875rem; color:var(--text-muted);">Category</label>
+                <select id="submitType" style="margin-top:4px;">
+                    <option value="script">Script Payload</option>
+                    <option value="admin">Admin Tool</option>
+                    <option value="combat">Combat</option>
+                    <option value="visuals">Visuals</option>
+                    <option value="utility">Utility</option>
+                    <option value="executor" id="submitTypeExecutorOpt">Executor (Authorized Only)</option>
                 </select>
             </div>
-            <div class="input-group" style="margin-bottom:15px;"> 
-                <label>Asset Title (Max 20 characters)</label>
-                <input type="text" id="title" style="width:100%;" placeholder="e.g., Infinite Yield Mod" maxlength="20">
+            <div style="margin-bottom:12px;">
+                <label style="font-size:0.875rem; color:var(--text-muted);">Title</label>
+                <input type="text" id="title" placeholder="Script Name" maxlength="30" style="margin-top:4px;">
             </div>
-            <div class="input-group file-upload-wrapper" style="margin-bottom:15px;">                 
-                <label>Asset Image Banner (Upload from PC)</label>       
-                <input type="file" id="imageFile" accept="image/*" style="width:100%;">
+            <div style="margin-bottom:12px;">
+                <label style="font-size:0.875rem; color:var(--text-muted);">Image Banner (Optional File)</label>
+                <input type="file" id="imageFile" accept="image/*" style="margin-top:4px;">
             </div>
-            <div class="input-group" style="margin-bottom:15px;">                 
-                <label>Detailed System Overview Description</label>                 
-                <textarea id="desc" style="width:100%; height:100px; resize:none;" placeholder="Detail operational configurations..."></textarea>
+            <div style="margin-bottom:12px;">
+                <label style="font-size:0.875rem; color:var(--text-muted);">Description</label>
+                <textarea id="desc" style="height:80px; resize:vertical; margin-top:4px;" placeholder="Provide documentation or overview..."></textarea>
             </div>
-            <div class="input-group" style="margin-bottom:15px;">                 
-                <label id="payloadLabel">Lua Code Array Payload</label>                 
-                <textarea id="code" style="width:100%; height:180px; font-family:monospace; resize:vertical;" placeholder="-- Code streams here"></textarea>
-            </div>             
-            <button onclick="submitToDatabase()" class="action-btn submit-btn">🚀 Dispatch Asset into Catalog</button>         
-        </div>     
+            <div style="margin-bottom:12px;">
+                <label id="payloadLabel" style="font-size:0.875rem; color:var(--text-muted);">Script Payload (Lua or Raw HttpGet Link)</label>
+                <textarea id="code" style="height:140px; font-family:monospace; resize:vertical; margin-top:4px;" placeholder='loadstring(game:HttpGet("https://pastefy.app/.../raw"))()'></textarea>
+            </div>
+            <button onclick="submitToDatabase()" class="action-btn copy-btn" style="width:100%;">Dispatch to Catalog</button>
+        </div>
     </div>
 
     <div id="view-account-view" class="view-panel hidden">
         <div id="unauth-box">
-            <h3>🔒 Gateway Verification Check</h3>            
-            <div style="background:#090a0f; padding:15px; border-radius:8px; border:1px solid var(--border); text-align:center; margin-bottom:20px;">                 
-                <span id="captchaDisplay" style="font-size:18px; font-weight:bold;">Calculating...</span>                 
-                <input type="number" id="captchaInput" placeholder="Response" style="margin-top:10px; text-align:center; width:140px; display:block; margin-left:auto; margin-right:auto;">             
-            </div>             
-            <input type="email" id="emailIn" placeholder="Email" style="width:100%; margin-bottom:12px;">             
-            <input type="password" id="passIn" placeholder="Password" style="width:100%; margin-bottom:15px;">             
-            <button onclick="handleEmailAuth('login')" style="width:100%; margin-bottom:10px; background:var(--accent); font-weight:bold; height:50px; border-radius:8px; border:none; color:white; cursor:pointer;">Login Account</button>             
-            <button onclick="handleEmailAuth('register')" style="width:100%; background:#1e293b; font-weight:bold; height:50px; border-radius:8px; border:none; color:white; cursor:pointer;">Create Account</button>         
-        </div>          
-        <div id="setup-box" class="hidden">             
-            <h3>👤 Handle Setup Configuration Wizard</h3>             
-            <input type="text" id="usernameIn" placeholder="Display handle alias" style="width:100%; margin-bottom:12px;">             
-            <input type="number" id="ageIn" placeholder="Verify profile age integer" style="width:100%; margin-bottom:15px;">             
-            <button onclick="saveProfileNode()" style="width:100%; height:50px; background:var(--success); font-weight:bold; border:none; border-radius:8px; cursor:pointer;">Finalize & Register</button>         
-        </div>          
-        <div id="dashboard-box" class="hidden">             
-            <div style="background:#090a0f; border:1px solid var(--border); border-radius:var(--ui-corner); padding:20px; margin-bottom:25px;">                 
-                <h4 style="margin-top:0; color:var(--accent); display:flex; align-items:center; justify-content:space-between;">                     
-                    🔔 Real-Time Platform Alerts                     
-                    <button onclick="clearMyNotifications()" style="background:none; border:none; color:var(--error); cursor:pointer; font-size:12px; font-weight:bold;">[Clear All]</button>                 
-                </h4>                 
-                <div id="notificationsBox">No active notifications.</div>             
-            </div>             
-            <h3>📋 Personal Asset Library History Queue</h3>             
-            <div id="userLibraryQueue" style="margin-bottom: 25px;">No historical listings.</div>        
-        </div>     
-    </div>     
+            <h3>Gateway Verification</h3>
+            <div style="background:var(--input-bg); padding:12px; border-radius:6px; border:1px solid var(--border); text-align:center; margin-bottom:12px;">
+                <span id="captchaDisplay" style="font-weight:bold;">Calculating...</span>
+                <input type="number" id="captchaInput" placeholder="Answer" style="margin-top:8px; text-align:center; max-width:120px; display:block; margin-left:auto; margin-right:auto;">
+            </div>
+            <input type="email" id="emailIn" placeholder="Email" style="margin-bottom:8px;">
+            <input type="password" id="passIn" placeholder="Password" style="margin-bottom:12px;">
+            <button onclick="handleEmailAuth('login')" class="action-btn copy-btn" style="width:100%; margin-bottom:8px;">Login</button>
+            <button onclick="handleEmailAuth('register')" class="action-btn" style="width:100%; background:var(--input-bg); border:1px solid var(--border); color:var(--text-main);">Create Account</button>
+        </div>
+        <div id="setup-box" class="hidden">
+            <h3>Complete Profile</h3>
+            <input type="text" id="usernameIn" placeholder="Username Handle" style="margin-bottom:12px;">
+            <button onclick="saveProfileNode()" class="action-btn copy-btn" style="width:100%;">Save & Continue</button>
+        </div>
+        <div id="dashboard-box" class="hidden">
+            <h3>Your Asset Submissions</h3>
+            <div id="userLibraryQueue">No submissions logged.</div>
+        </div>
+    </div>
 
-    <div id="view-admin-view" class="view-panel hidden">         
-        <h3 style="color:var(--premium-gold); border-bottom: 1px solid var(--border); padding-bottom: 10px;">🛡️ Owner Infrastructure Administration</h3>                  
-        <div class="admin-block">             
-            <h4 style="margin-top:0; color:var(--accent);">📋 Pending Verification Queue</h4>             
-            <div id="adminPendingContainer">No submissions requiring verification review.</div>         
-        </div>          
-        <div class="admin-block">             
-            <h4 style="margin-top:0; color:var(--success);">✅ Approved Catalog Logs</h4>             
-            <div id="adminApprovedContainer">No active catalog listings.</div>         
-        </div>     
-    </div> 
-</div>  
+    <div id="view-admin-view" class="view-panel hidden">
+        <h3 style="color:var(--gold);">Management System</h3>
+        <div style="margin-bottom:20px;">
+            <h4>Pending Reviews</h4>
+            <div id="adminPendingContainer">No pending items.</div>
+        </div>
+        <div>
+            <h4>Approved Index</h4>
+            <div id="adminApprovedContainer">No active items.</div>
+        </div>
+    </div>
+</div>
 
-<div id="workspaceOverlay" class="workspace-overlay" onclick="if(event.target === this) closeWorkspace()">     
-    <div class="wrapper">         
-        <button class="nav-btn" onclick="closeWorkspace()" style="background:#1e293b; margin-bottom:20px; color:#fff; max-width:200px;">⬅️ Exit Viewer</button>                  
-        <img id="popImageBanner" class="pop-image-banner hidden" src="" alt="Asset banner">                  
-        <h1 id="popTitle" style="color:var(--accent); margin:0 0 5px 0;">Asset</h1>         
-        <p id="popAuthor" style="color:var(--muted); margin:0 0 15px 0;">Published by: --</p>         
-        <p id="popDesc" style="line-height:1.6; color:#cbd5e1; margin-bottom:20px;">Details data block...</p>                  
-        <div id="popMetrics" style="color:var(--premium-gold); font-size:13px; font-weight:600; margin-bottom:12px; background:#090a0f; padding:8px 12px; border-radius:6px; display:inline-block; border:1px solid var(--border);">             
-            👁️ 0 Views | 👍 0 Likes | 📋 0 Copies | ⭐ 0.0 Rating         
-        </div>                  
-        <div id="scriptContentArea">             
-            <pre id="popCode">-- Source stream</pre>         
-        </div>                  
-        <div style="display:flex; gap:12px; margin:25px 0;">             
-            <button id="popLikeBtn" onclick="likeCurrentScript()" class="action-btn like-btn">👍 Upvote Asset</button>             
-            <button id="mainActionBtn" onclick="copyOrDownloadPayload()" class="action-btn copy-btn">📋 Copy Script Code</button>         
-        </div>          
-        <div style="background:#090a0f; border:1px solid var(--border); padding:20px; border-radius:12px; margin-bottom:25px;">             
-            <h4 style="margin:0 0 10px 0; color:var(--premium-gold);">⭐ Cast Performance Evaluation</h4>             
-            <div class="rating-stars" id="starContainer">                 
-                <span data-value="1" onclick="submitRating(1)">★</span>                 
-                <span data-value="2" onclick="submitRating(2)">★</span>                 
-                <span data-value="3" onclick="submitRating(3)">★</span>                 
-                <span data-value="4" onclick="submitRating(4)">★</span>                 
-                <span data-value="5" onclick="submitRating(5)">★</span>             
-            </div>             
-            <div id="userRatingNotice" style="font-size:12px; color:var(--muted);">Select stars to submit data.</div>         
-        </div>     
-    </div> 
-</div>  
+<div id="workspaceOverlay" class="workspace-overlay" onclick="if(event.target === this) closeWorkspace()">
+    <div class="wrapper">
+        <button class="nav-btn" onclick="closeWorkspace()" style="margin-bottom:16px;">Close Window</button>
+        <img id="popImageBanner" class="card-preview-img hidden" style="width:100%; height:180px; margin-bottom:16px;" src="" alt="Banner">
+        <h2 id="popTitle" style="margin:0 0 4px 0; color:var(--accent);">Asset Title</h2>
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+            <p id="popAuthor" style="color:var(--text-muted); margin:0;">Author: --</p>
+            <button id="popFollowBtn" onclick="toggleFollowAuthor()" class="action-btn follow-btn" style="padding:4px 12px; font-size:0.75rem;">Follow</button>
+        </div>
+        <p id="popDesc" style="color:var(--text-main); line-height:1.5; margin-bottom:16px;">Description detail...</p>
+        <div id="popMetrics" style="font-size:0.8125rem; color:var(--gold); margin-bottom:12px;">Views: 0 | Upvotes: 0 | Rating: 0.0</div>
+        <pre id="popCode">-- Code Payload</pre>
+        <div style="display:flex; gap:8px; margin:20px 0;">
+            <button id="popLikeBtn" onclick="likeCurrentScript()" class="action-btn like-btn">Upvote</button>
+            <button id="mainActionBtn" onclick="copyOrDownloadPayload()" class="action-btn copy-btn">Copy Payload</button>
+        </div>
+        <div style="background:var(--input-bg); border:1px solid var(--border); padding:16px; border-radius:8px;">
+            <div style="font-size:0.875rem; font-weight:600; margin-bottom:8px;">Submit Performance Rating</div>
+            <div class="rating-stars" id="starContainer">
+                <span data-value="1" onclick="submitRating(1)">★</span>
+                <span data-value="2" onclick="submitRating(2)">★</span>
+                <span data-value="3" onclick="submitRating(3)">★</span>
+                <span data-value="4" onclick="submitRating(4)">★</span>
+                <span data-value="5" onclick="submitRating(5)">★</span>
+            </div>
+            <div id="userRatingNotice" style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Click star to rate.</div>
+        </div>
+    </div>
+</div>
 
-<script>     
-    const firebaseConfig = {        
-        apiKey: "AIzaSyD_MlIJaaxCILaRgzEi_n1QRO-Jgm4QBkQ",        
-        authDomain: "robloxscripthub-1e806.firebaseapp.com",        
-        databaseURL: "https://robloxscripthub-1e806-default-rtdb.firebaseio.com",        
-        projectId: "robloxscripthub-1e806",        
-        storageBucket: "robloxscripthub-1e806.firebasestorage.app",        
-        messagingSenderId: "693643463680",        
-        appId: "1:693643463680:web:97da92738a30abae445ce5"     
-    };     
-    firebase.initializeApp(firebaseConfig);     
-    
-    const auth = firebase.auth();     
-    const rtdb = firebase.database();     
-    
-    let masterList = [], activeScriptId = null, valA = 0, valB = 0, targetResult = 0;     
-    let isAdminUser = false;     
-    
-    document.getElementById('submitType').addEventListener('change', (e) => {         
-        let label = document.getElementById('payloadLabel');         
-        let codeArea = document.getElementById('code');         
-        if(e.target.value === 'executor') {             
-            label.innerText = "Executor Direct Download Link";             
-            codeArea.placeholder = "https://drive.google.com/...";         
-        } else {             
-            label.innerText = "Lua Code Array Payload";
-            codeArea.placeholder = "-- Code streams here";         
-        }     
-    });
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyD_MlIJaaxCILaRgzEi_n1QRO-Jgm4QBkQ",
+        authDomain: "robloxscripthub-1e806.firebaseapp.com",
+        databaseURL: "https://robloxscripthub-1e806-default-rtdb.firebaseio.com",
+        projectId: "robloxscripthub-1e806",
+        storageBucket: "robloxscripthub-1e806.firebasestorage.app",
+        messagingSenderId: "693643463680",
+        appId: "1:693643463680:web:97da92738a30abae445ce5"
+    };
+    firebase.initializeApp(firebaseConfig);
 
-    function genCap() {         
-        valA = Math.floor(Math.random() * 8) + 2;
-        valB = Math.floor(Math.random() * 9) + 1; 
-        targetResult = valA + valB;         
-        if(document.getElementById('captchaDisplay')) document.getElementById('captchaDisplay').innerText = `What is ${valA} + ${valB}?`;
-    }     
+    const auth = firebase.auth();
+    const rtdb = firebase.database();
 
-    function switchView(viewId) {         
+    let masterList = [], activeScriptId = null, activeAuthorUid = null;
+    let targetResult = 0, isAdminUser = false;
+
+    // UI MAKER STATE
+    let uiProject = {
+        window: { title: "Custom UI Panel", width: 450, height: 300, accent: "#2563eb" },
+        tabs: [{
+            id: "t_1",
+            name: "Main Scripts",
+            elements: [
+                { id: "e_1", type: "button", name: "Print Hello", code: "print('Hello from your customizable UI framework!')" },
+                { id: "e_2", type: "toggle", name: "Speed Multiplier Loop", code: "if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild('Humanoid') then\n    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 50\nend" }
+            ]
+        }]
+    };
+    let currentTabId = "t_1", selectedId = "global", selectedType = "global";
+
+    window.onload = function() {
+        selectTarget('global', 'global');
+        renderMakerUI();
+    };
+
+    // THEME TOGGLE
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', nextTheme);
+    }
+
+    // CAPTCHA GENERATOR
+    function genCap() {
+        const a = Math.floor(Math.random() * 8) + 2;
+        const b = Math.floor(Math.random() * 9) + 1;
+        targetResult = a + b;
+        document.getElementById('captchaDisplay').innerText = `Security Check: What is ${a} + ${b}?`;
+    }
+
+    function switchView(viewId) {
         document.querySelectorAll('.view-panel').forEach(p => p.classList.add('hidden'));
-        document.getElementById('view-' + viewId).classList.remove('hidden');         
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));                  
-        let tabName = 'tab' + viewId.split('-')[0].charAt(0).toUpperCase() + viewId.split('-')[0].slice(1);         
-        let tabTarget = document.getElementById(tabName);         
+        document.getElementById('view-' + viewId).classList.remove('hidden');
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        const tabTarget = document.getElementById('tab' + viewId.split('-')[0].charAt(0).toUpperCase() + viewId.split('-')[0].slice(1));
         if(tabTarget) tabTarget.classList.add('active');
-    }     
+    }
 
-    // GLOBAL DATABASE REALTIME LISTENER
-    rtdb.ref('scripts').on('value', sn => {         
-        masterList = [];          
-        if(sn.exists()) { 
-            sn.forEach(c => { 
-                let d = c.val(); 
-                d.id = c.key; 
-                masterList.push(d); 
-            }); 
-        }         
-        filterFeed();                  
-        if(auth.currentUser) {             
-            loadUserAssetQueue(auth.currentUser.uid);            
-            if(isAdminUser) renderOwnerAdminPanels();         
-        }          
-        if(activeScriptId) {             
-            let updated = masterList.find(x => x.id === activeScriptId);             
-            if(updated) {
-                updateOverlayMetricsUI(updated);
-                checkUserInteractions(activeScriptId);
-            }         
-        }     
+    // REALTIME DATABASE LISTENER
+    rtdb.ref('scripts').on('value', sn => {
+        masterList = [];
+        if(sn.exists()) {
+            sn.forEach(c => {
+                let d = c.val();
+                d.id = c.key;
+                masterList.push(d);
+            });
+        }
+        filterFeed();
+        if(auth.currentUser) {
+            loadUserAssetQueue(auth.currentUser.uid);
+            if(isAdminUser) renderOwnerAdminPanels();
+        }
+        if(activeScriptId) {
+            let updated = masterList.find(x => x.id === activeScriptId);
+            if(updated) updateOverlayMetricsUI(updated);
+        }
     });
 
-    auth.onAuthStateChanged(user => {         
-        if(user) {             
-            localStorage.setItem('hub_user_uid', user.uid);             
-            rtdb.ref('users/' + user.uid).once('value', sn => {                 
-                if(sn.exists()) {                     
-                    let uData = sn.val();                     
-                    localStorage.setItem('hub_username', uData.username);                     
-                    document.getElementById('headerUsername').innerText = uData.username;                     
-                    document.getElementById('loggedUserBadge').classList.remove('hidden');                     
-                    document.getElementById('unauth-box').classList.add('hidden');                     
-                    document.getElementById('setup-box').classList.add('hidden');                     
-                    document.getElementById('dashboard-box').classList.remove('hidden');                                             
-                    checkAdminClearance(user.email, uData.username);                     
-                    listenToNotifications(user.uid);                 
-                } else {  
+    auth.onAuthStateChanged(user => {
+        if(user) {
+            rtdb.ref('users/' + user.uid).once('value', sn => {
+                if(sn.exists()) {
+                    let uData = sn.val();
+                    document.getElementById('headerUsername').innerText = uData.username;
+                    document.getElementById('loggedUserBadge').classList.remove('hidden');
                     document.getElementById('unauth-box').classList.add('hidden');
-                    document.getElementById('setup-box').classList.remove('hidden');                 
-                }             
+                    document.getElementById('setup-box').classList.add('hidden');
+                    document.getElementById('dashboard-box').classList.remove('hidden');
+                    checkAdminClearance(user.email, uData.username);
+                    updateUserFollowStats(user.uid);
+                } else {
+                    document.getElementById('unauth-box').classList.add('hidden');
+                    document.getElementById('setup-box').classList.remove('hidden');
+                }
             });
-        } else {             
-            localStorage.clear();             
-            document.getElementById('loggedUserBadge').classList.add('hidden');             
-            document.getElementById('unauth-box').classList.remove('hidden');             
+        } else {
+            document.getElementById('loggedUserBadge').classList.add('hidden');
+            document.getElementById('unauth-box').classList.remove('hidden');
             genCap();
-        }     
-    });     
+        }
+    });
 
-    function logoutUser() { auth.signOut().then(() => location.reload()); }     
+    function logoutUser() { auth.signOut().then(() => location.reload()); }
 
-    function checkAdminClearance(email, username) {         
-        if (String(email).toLowerCase() === 'vodlan.oskar@gmail.com' || username === 'Bad-AhhScripter') {             
+    function checkAdminClearance(email, username) {
+        if (String(email).toLowerCase() === 'vodlan.oskar@gmail.com' || username === 'Bad-AhhScripter') {
             isAdminUser = true;
-            document.getElementById('tabAdmin').classList.remove('hidden');             
-            document.getElementById('submitTypeExecutorOpt').disabled = false;             
-            document.getElementById('submitTypeExecutorOpt').innerText = "⚙️ System Executor (Authorized)";             
-            renderOwnerAdminPanels();
-        } else {             
-            isAdminUser = false;             
+            document.getElementById('tabAdmin').classList.remove('hidden');
+            document.getElementById('submitTypeExecutorOpt').disabled = false;
+        } else {
+            isAdminUser = false;
             document.getElementById('tabAdmin').classList.add('hidden');
-            document.getElementById('submitTypeExecutorOpt').disabled = true;             
-            document.getElementById('submitTypeExecutorOpt').innerText = "⚙️ System Executor (Owner Only)";
-        }     
-    }     
+            document.getElementById('submitTypeExecutorOpt').disabled = true;
+        }
+    }
 
-    function handleEmailAuth(mode) {         
-        if(parseInt(document.getElementById('captchaInput').value) !== targetResult) { 
-            alert("Security Captcha Failed!");
-            return genCap(); 
-        }         
+    function handleEmailAuth(mode) {
+        if(parseInt(document.getElementById('captchaInput').value) !== targetResult) {
+            alert("Captcha Verification Failed.");
+            return genCap();
+        }
         let em = document.getElementById('emailIn').value.trim(), pa = document.getElementById('passIn').value.trim();
-        if(!em || !pa) return alert("Complete fields.");         
-        if(mode==='login') auth.signInWithEmailAndPassword(em,pa).catch(e=>alert(e.message));         
+        if(!em || !pa) return alert("Fill in required auth fields.");
+        if(mode==='login') auth.signInWithEmailAndPassword(em,pa).catch(e=>alert(e.message));
         else auth.createUserWithEmailAndPassword(em,pa).catch(e=>alert(e.message));
-    }     
+    }
 
-    function saveProfileNode() {         
-        let name = document.getElementById('usernameIn').value.trim(), age = document.getElementById('ageIn').value.trim();
-        if(!name || !age) return alert("Incomplete parameters.");         
-        rtdb.ref('users/' + auth.currentUser.uid).set({ username: name, age: parseInt(age), uid: auth.currentUser.uid }).then(() => location.reload());
-    }     
+    function saveProfileNode() {
+        let name = document.getElementById('usernameIn').value.trim();
+        if(!name) return alert("Provide a valid username.");
+        rtdb.ref('users/' + auth.currentUser.uid).set({ username: name, uid: auth.currentUser.uid }).then(() => location.reload());
+    }
 
-    function submitToDatabase() {         
-        let type = document.getElementById('submitType').value;
-        if(type === 'executor' && !isAdminUser) {             
-            alert("Security Violation: Only system owners can deploy executors.");
-            return;         
-        }         
-        let t = document.getElementById('title').value.trim();         
-        let d = document.getElementById('desc').value.trim();
-        let c = document.getElementById('code').value.trim();         
-        let fileInput = document.getElementById('imageFile');
+    // STRICT SCRIPT VALIDATION
+    function validateScriptPayload(text) {
+        const rawPastePattern = /^loadstring\s*\(\s*game\s*:\s*HttpGet\s*\(\s*["']https?:\/\/(pastebin\.com|pastefy\.app|raw\.githubusercontent\.com)\/[^"']+\/raw["']\s*\)\s*\)\s*\(\s*\)$/i;
+        const luaKeywords = ["function", "local", "then", "end", "elseif", "do", "repeat", "until"];
         
-        if(!t || !d || !c) return alert("Fill all elements.");
+        const isPastebinRaw = rawPastePattern.test(text.trim());
+        const containsLuaKeywords = luaKeywords.some(kw => new RegExp(`\\b${kw}\\b`).test(text));
 
-        const proceedSubmission = (imgData) => {
-            let targetStatus = (type === 'executor' || isAdminUser) ? 'approved' : 'pending';
-            rtdb.ref('scripts').push({             
+        return isPastebinRaw || containsLuaKeywords;
+    }
+
+    function submitToDatabase() {
+        let type = document.getElementById('submitType').value;
+        if(type === 'executor' && !isAdminUser) return alert("Unauthorized executor deployment.");
+
+        let t = document.getElementById('title').value.trim();
+        let d = document.getElementById('desc').value.trim();
+        let c = document.getElementById('code').value.trim();
+        let fileInput = document.getElementById('imageFile');
+
+        if(!t || !d || !c) return alert("Fill all fields.");
+
+        if(type !== 'executor' && !validateScriptPayload(c)) {
+            return alert("Invalid payload! Submissions must either contain valid Lua code keywords or a valid raw paste loadstring.");
+        }
+
+        const executeSubmit = (imgData) => {
+            let statusVal = (type === 'executor' || isAdminUser) ? 'approved' : 'pending';
+            rtdb.ref('scripts').push({
                 type: type, title: t, description: d, code: c, imageUrl: imgData,
-                submittedBy: localStorage.getItem('hub_username') || 'Anonymous',             
-                userId: auth.currentUser ? auth.currentUser.uid : 'anon', status: targetStatus,             
-                views: 0, upvotes: 0, copiedCount: 0, totalRatings: 0, sumRatings: 0, timestamp: Date.now()         
-            }).then(() => {             
-                alert(targetStatus === 'approved' ? "Asset published successfully!" : "Submitted for Owner Verification!");             
-                document.getElementById('title').value = "";             
-                document.getElementById('desc').value = "";             
-                document.getElementById('code').value = "";             
-                fileInput.value = "";
-                switchView('feed-view');         
+                submittedBy: document.getElementById('headerUsername').innerText || 'Anonymous',
+                userId: auth.currentUser ? auth.currentUser.uid : 'anon', status: statusVal,
+                views: 0, upvotes: 0, totalRatings: 0, sumRatings: 0, timestamp: Date.now()
+            }).then(() => {
+                alert("Asset record published.");
+                document.getElementById('title').value = "";
+                document.getElementById('desc').value = "";
+                document.getElementById('code').value = "";
+                switchView('feed-view');
             });
         };
 
         if(fileInput.files && fileInput.files[0]) {
             let reader = new FileReader();
-            reader.onload = function(e) {
-                proceedSubmission(e.target.result);
-            };
+            reader.onload = (e) => executeSubmit(e.target.result);
             reader.readAsDataURL(fileInput.files[0]);
         } else {
-            proceedSubmission("");
+            executeSubmit("");
         }
     }
 
-    // FEED FILTER & RENDER ENGINE
+    // FEED RENDER WITH SHOW MORE
     function filterFeed() {
-        const searchQuery = (document.getElementById('searchBar').value || '').toLowerCase();
+        const query = (document.getElementById('searchBar').value || '').toLowerCase();
         const category = document.getElementById('categoryFilter').value;
         const sortBy = document.getElementById('sortFilter').value;
 
         let filtered = masterList.filter(item => {
             if (item.status !== 'approved') return false;
-
-            const matchesSearch = (item.title || '').toLowerCase().includes(searchQuery) || 
-                                  (item.description || '').toLowerCase().includes(searchQuery);
-            const matchesCategory = category === 'all' || item.type === category;
-
-            return matchesSearch && matchesCategory;
+            const matchSearch = item.title.toLowerCase().includes(query) || item.description.toLowerCase().includes(query);
+            const matchCategory = category === 'all' || item.type === category;
+            return matchSearch && matchCategory;
         });
 
-        if (sortBy === 'newest') {
-            filtered.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-        } else if (sortBy === 'likes') {
-            filtered.sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0));
-        }
+        if (sortBy === 'newest') filtered.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        else if (sortBy === 'likes') filtered.sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0));
 
         renderFeed(filtered);
     }
 
     function renderFeed(items) {
         const feedList = document.getElementById('feedList');
-        
         if (!items || items.length === 0) {
-            feedList.innerHTML = '<div style="color:var(--muted); text-align:center; padding: 20px;">No published assets found.</div>';
+            feedList.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:20px;">No published items found.</div>';
             return;
         }
 
-        feedList.innerHTML = items.map(item => `
+        feedList.innerHTML = items.map(item => {
+            const isLongText = item.description.length > 110;
+            const shortDesc = isLongText ? item.description.substring(0, 110) + '...' : item.description;
+
+            return `
             <div class="feed-card" onclick="openWorkspace('${item.id}')">
                 ${item.imageUrl ? `<img src="${item.imageUrl}" class="card-preview-img" alt="Preview">` : ''}
                 <div class="card-body-content">
                     <div class="card-header">
-                        <h3 style="margin:0; color:var(--accent);">${item.title}</h3>
-                        <span style="font-size:12px; padding:4px 8px; background:#141724; border-radius:4px; color:var(--muted); text-transform:uppercase;">${item.type}</span>
+                        <strong style="color:var(--accent);">${item.title}</strong>
+                        <span class="category-badge">${item.type}</span>
                     </div>
-                    <p style="margin:8px 0; font-size:14px; color:#cbd5e1;">${item.description}</p>
+                    <div class="desc-text" id="desc-container-${item.id}">
+                        <span id="desc-text-${item.id}">${shortDesc}</span>
+                        ${isLongText ? `<button class="show-more-btn" onclick="event.stopPropagation(); toggleDescText('${item.id}', \`${item.description.replace(/`/g, '\\`')}\`)">Show More</button>` : ''}
+                    </div>
                     <div class="card-meta">
-                        <span>👤 ${item.submittedBy || 'Anonymous'}</span>
-                        <span>👍 ${item.upvotes || 0} Likes</span>
-                        <span>👁️ ${item.views || 0} Views</span>
+                        <span>Author: ${item.submittedBy || 'Anonymous'}</span>
+                        <span>Upvotes: ${item.upvotes || 0}</span>
+                        <span>Views: ${item.views || 0}</span>
                     </div>
                 </div>
-            </div>
-        `).join('');
+            </div>`;
+        }).join('');
     }
 
-    // WORKSPACE MODAL POPUP ENGINE
+    function toggleDescText(id, fullDesc) {
+        const elem = document.getElementById(`desc-container-${id}`);
+        elem.innerHTML = `${fullDesc} <button class="show-more-btn" onclick="event.stopPropagation(); filterFeed()">Show Less</button>`;
+    }
+
+    // WORKSPACE MODAL
     function openWorkspace(id) {
-        const scriptData = masterList.find(x => x.id === id);
-        if(!scriptData) return;
+        const item = masterList.find(x => x.id === id);
+        if(!item) return;
 
         activeScriptId = id;
-        
-        // Register View Count
-        rtdb.ref(`scripts/${id}/views`).transaction(views => (views || 0) + 1);
+        activeAuthorUid = item.userId;
 
-        document.getElementById('popTitle').innerText = scriptData.title;
-        document.getElementById('popAuthor').innerText = `Published by: ${scriptData.submittedBy || 'Anonymous'}`;
-        document.getElementById('popDesc').innerText = scriptData.description;
-        document.getElementById('popCode').innerText = scriptData.code;
+        rtdb.ref(`scripts/${id}/views`).transaction(v => (v || 0) + 1);
+
+        document.getElementById('popTitle').innerText = item.title;
+        document.getElementById('popAuthor').innerText = `Author: ${item.submittedBy || 'Anonymous'}`;
+        document.getElementById('popDesc').innerText = item.description;
+        document.getElementById('popCode').innerText = item.code;
 
         const imgBanner = document.getElementById('popImageBanner');
-        if(scriptData.imageUrl) {
-            imgBanner.src = scriptData.imageUrl;
+        if(item.imageUrl) {
+            imgBanner.src = item.imageUrl;
             imgBanner.classList.remove('hidden');
         } else {
             imgBanner.classList.add('hidden');
         }
 
-        const mainBtn = document.getElementById('mainActionBtn');
-        if(scriptData.type === 'executor') {
-            mainBtn.className = "action-btn download-btn";
-            mainBtn.innerText = "⚡ Download Executor Payload";
-        } else {
-            mainBtn.className = "action-btn copy-btn";
-            mainBtn.innerText = "📋 Copy Script Code";
-        }
-
-        updateOverlayMetricsUI(scriptData);
+        updateOverlayMetricsUI(item);
         checkUserInteractions(id);
+        checkFollowState();
 
-        const overlay = document.getElementById('workspaceOverlay');
-        overlay.style.display = 'block';
-        setTimeout(() => overlay.classList.add('open'), 10);
+        document.getElementById('workspaceOverlay').classList.add('open');
     }
 
     function closeWorkspace() {
-        const overlay = document.getElementById('workspaceOverlay');
-        overlay.classList.remove('open');
-        setTimeout(() => {
-            overlay.style.display = 'none';
-            activeScriptId = null;
-        }, 300);
+        document.getElementById('workspaceOverlay').classList.remove('open');
+        activeScriptId = null;
     }
 
     function updateOverlayMetricsUI(data) {
         const avg = data.totalRatings ? (data.sumRatings / data.totalRatings).toFixed(1) : '0.0';
-        document.getElementById('popMetrics').innerText = 
-            `👁️ ${data.views || 0} Views | 👍 ${data.upvotes || 0} Likes | 📋 ${data.copiedCount || 0} Downloads | ⭐ ${avg} Rating`;
+        document.getElementById('popMetrics').innerText = `Views: ${data.views || 0} | Upvotes: ${data.upvotes || 0} | Rating: ${avg}`;
     }
 
     function copyOrDownloadPayload() {
         if(!activeScriptId) return;
-        const scriptData = masterList.find(x => x.id === activeScriptId);
-        if(!scriptData) return;
+        const item = masterList.find(x => x.id === activeScriptId);
+        if(!item) return;
 
-        rtdb.ref(`scripts/${activeScriptId}/copiedCount`).transaction(c => (c || 0) + 1);
-
-        if(scriptData.type === 'executor') {
-            window.open(scriptData.code, '_blank');
-        } else {
-            navigator.clipboard.writeText(scriptData.code).then(() => {
-                alert("Lua payload copied to clipboard!");
-            });
-        }
+        if(item.type === 'executor') window.open(item.code, '_blank');
+        else navigator.clipboard.writeText(item.code).then(() => alert("Code copied to clipboard."));
     }
 
+    // TOGGLE LIKES DATABASE LOGIC
     function likeCurrentScript() {
-        if(!auth.currentUser) return alert("Please log in to like assets.");
+        if(!auth.currentUser) return alert("Log in to vote.");
         if(!activeScriptId) return;
 
-        const userUid = auth.currentUser.uid;
-        const likeRef = rtdb.ref(`userLikes/${userUid}/${activeScriptId}`);
+        const uid = auth.currentUser.uid;
+        const likeRef = rtdb.ref(`userLikes/${uid}/${activeScriptId}`);
 
         likeRef.once('value', sn => {
             if(sn.exists()) {
@@ -676,41 +950,13 @@
                 likeRef.set(true);
                 rtdb.ref(`scripts/${activeScriptId}/upvotes`).transaction(v => (v || 0) + 1);
             }
+            checkUserInteractions(activeScriptId);
         });
     }
 
-    function checkUserInteractions(scriptId) {
-        if(!auth.currentUser) return;
-        
-        // Like Button status
-        rtdb.ref(`userLikes/${auth.currentUser.uid}/${scriptId}`).once('value', sn => {
-            const btn = document.getElementById('popLikeBtn');
-            if(sn.exists()) {
-                btn.innerText = "💔 Unlike Asset";
-                btn.style.background = "#64748b";
-            } else {
-                btn.innerText = "👍 Upvote Asset";
-                btn.style.background = "var(--error)";
-            }
-        });
-
-        // User Rating status
-        rtdb.ref(`userRatings/${auth.currentUser.uid}/${scriptId}`).once('value', sn => {
-            const val = sn.val() || 0;
-            highlightStars(val);
-            document.getElementById('userRatingNotice').innerText = val ? `Your active rating: ${val} ★` : "Select stars to submit data.";
-        });
-    }
-
-    function highlightStars(val) {
-        document.querySelectorAll('#starContainer span').forEach(s => {
-            if(parseInt(s.dataset.value) <= val) s.classList.add('selected');
-            else s.classList.remove('selected');
-        });
-    }
-
+    // SINGLE RATING LOGIC
     function submitRating(val) {
-        if(!auth.currentUser) return alert("Sign in to submit rating.");
+        if(!auth.currentUser) return alert("Log in to rate.");
         if(!activeScriptId) return;
 
         const uid = auth.currentUser.uid;
@@ -734,23 +980,79 @@
         });
     }
 
-    // USER DASHBOARD & ADMIN PANEL LOGIC
+    function checkUserInteractions(id) {
+        if(!auth.currentUser) return;
+        rtdb.ref(`userLikes/${auth.currentUser.uid}/${id}`).once('value', sn => {
+            const btn = document.getElementById('popLikeBtn');
+            btn.innerText = sn.exists() ? "Remove Upvote" : "Upvote";
+        });
+        rtdb.ref(`userRatings/${auth.currentUser.uid}/${id}`).once('value', sn => {
+            highlightStars(sn.val() || 0);
+        });
+    }
+
+    function highlightStars(val) {
+        document.querySelectorAll('#starContainer span').forEach(s => {
+            if(parseInt(s.dataset.value) <= val) s.classList.add('selected');
+            else s.classList.remove('selected');
+        });
+    }
+
+    // FOLLOW / UNFOLLOW SYSTEM
+    function toggleFollowAuthor() {
+        if(!auth.currentUser) return alert("Log in to follow users.");
+        if(!activeAuthorUid || activeAuthorUid === auth.currentUser.uid) return alert("Cannot follow yourself.");
+
+        const uid = auth.currentUser.uid;
+        const followRef = rtdb.ref(`userFollowing/${uid}/${activeAuthorUid}`);
+
+        followRef.once('value', sn => {
+            if(sn.exists()) {
+                followRef.remove();
+                rtdb.ref(`userFollowers/${activeAuthorUid}/${uid}`).remove();
+            } else {
+                followRef.set(true);
+                rtdb.ref(`userFollowers/${activeAuthorUid}/${uid}`).set(true);
+            }
+            checkFollowState();
+            updateUserFollowStats(uid);
+        });
+    }
+
+    function checkFollowState() {
+        if(!auth.currentUser || !activeAuthorUid) return;
+        rtdb.ref(`userFollowing/${auth.currentUser.uid}/${activeAuthorUid}`).once('value', sn => {
+            const btn = document.getElementById('popFollowBtn');
+            btn.innerText = sn.exists() ? "Unfollow" : "Follow";
+        });
+    }
+
+    function updateUserFollowStats(uid) {
+        rtdb.ref(`userFollowers/${uid}`).once('value', snA => {
+            rtdb.ref(`userFollowing/${uid}`).once('value', snB => {
+                const followersCount = snA.exists() ? snA.numChildren() : 0;
+                const followingCount = snB.exists() ? snB.numChildren() : 0;
+                document.getElementById('userStats').innerText = `Followers: ${followersCount} | Following: ${followingCount}`;
+            });
+        });
+    }
+
     function loadUserAssetQueue(uid) {
         const queueBox = document.getElementById('userLibraryQueue');
         const userItems = masterList.filter(x => x.userId === uid);
 
         if(userItems.length === 0) {
-            queueBox.innerHTML = '<div style="color:var(--muted);">No historical listings found.</div>';
+            queueBox.innerHTML = '<div style="color:var(--text-muted);">No submissions logged.</div>';
             return;
         }
 
         queueBox.innerHTML = userItems.map(item => `
-            <div class="comment-box">
+            <div style="background:var(--input-bg); padding:10px; margin-bottom:8px; border-radius:6px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
                 <div>
                     <strong>${item.title}</strong> [${item.type.toUpperCase()}]
-                    <div style="font-size:12px; color:var(--muted);">Status: <span style="color:${item.status === 'approved' ? 'var(--success)' : 'var(--premium-gold)'};">${item.status.toUpperCase()}</span></div>
+                    <div style="font-size:0.75rem; color:var(--text-muted);">Status: ${item.status.toUpperCase()}</div>
                 </div>
-                <button onclick="deleteScript('${item.id}')" style="background:var(--error); border:none; padding:6px 12px; border-radius:6px; color:#fff; cursor:pointer;">Delete</button>
+                <button onclick="rtdb.ref('scripts/${item.id}').remove()" class="action-btn" style="background:var(--danger); color:#fff; padding:4px 8px;">Delete</button>
             </div>
         `).join('');
     }
@@ -763,59 +1065,256 @@
         const approved = masterList.filter(x => x.status === 'approved');
 
         pendingBox.innerHTML = pending.length ? pending.map(item => `
-            <div class="comment-box">
+            <div style="background:var(--input-bg); padding:10px; margin-bottom:8px; border-radius:6px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                <div><strong>${item.title}</strong> by ${item.submittedBy}</div>
                 <div>
-                    <strong>${item.title}</strong> by ${item.submittedBy}
-                    <div style="font-size:12px; color:var(--muted);">${item.description}</div>
-                </div>
-                <div style="display:flex; gap:6px;">
-                    <button onclick="setScriptStatus('${item.id}', 'approved')" style="background:var(--success); border:none; padding:6px 12px; border-radius:6px; color:#000; font-weight:bold; cursor:pointer;">Approve</button>
-                    <button onclick="deleteScript('${item.id}')" style="background:var(--error); border:none; padding:6px 12px; border-radius:6px; color:#fff; cursor:pointer;">Reject</button>
+                    <button onclick="rtdb.ref('scripts/${item.id}/status').set('approved')" class="action-btn" style="background:var(--success); color:#fff; padding:4px 8px;">Approve</button>
+                    <button onclick="rtdb.ref('scripts/${item.id}').remove()" class="action-btn" style="background:var(--danger); color:#fff; padding:4px 8px;">Reject</button>
                 </div>
             </div>
-        `).join('') : '<div style="color:var(--muted);">No submissions requiring verification.</div>';
+        `).join('') : '<div style="color:var(--text-muted);">No pending reviews.</div>';
 
         approvedBox.innerHTML = approved.length ? approved.map(item => `
-            <div class="comment-box">
-                <div>
-                    <strong>${item.title}</strong>
-                    <div style="font-size:12px; color:var(--muted);">👍 ${item.upvotes || 0} Likes | 👁️ ${item.views || 0} Views</div>
-                </div>
-                <button onclick="deleteScript('${item.id}')" style="background:var(--error); border:none; padding:6px 12px; border-radius:6px; color:#fff; cursor:pointer;">Remove</button>
+            <div style="background:var(--input-bg); padding:10px; margin-bottom:8px; border-radius:6px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                <div><strong>${item.title}</strong></div>
+                <button onclick="rtdb.ref('scripts/${item.id}').remove()" class="action-btn" style="background:var(--danger); color:#fff; padding:4px 8px;">Remove</button>
             </div>
-        `).join('') : '<div style="color:var(--muted);">No active catalog listings.</div>';
+        `).join('') : '<div style="color:var(--text-muted);">No active items.</div>';
     }
 
-    function setScriptStatus(id, status) {
-        rtdb.ref(`scripts/${id}/status`).set(status);
+    // UI MAKER BUILDER LOGIC (FROM script.html)
+    function renderMakerUI() {
+        renderTree();
+        renderPreview();
+        compileLuau();
     }
 
-    function deleteScript(id) {
-        if(confirm("Confirm deletion of this item?")) {
-            rtdb.ref(`scripts/${id}`).remove();
+    function addTab() {
+        let id = "t_" + Date.now();
+        uiProject.tabs.push({ id: id, name: "New Tab Section", elements: [] });
+        currentTabId = id;
+        selectTarget(id, 'tab');
+        renderMakerUI();
+    }
+
+    function addElement(type) {
+        let targetTab = uiProject.tabs.find(t => t.id === currentTabId);
+        if (!targetTab) return alert("Construct or select a Tab section first.");
+        
+        let id = "e_" + Date.now();
+        targetTab.elements.push({
+            id: id,
+            type: type,
+            name: type === 'button' ? "Action Script Button" : "State Loop Toggle",
+            code: type === 'button' ? "-- Click logic script\nprint('Button Clicked!')" : "-- Loop script\nprint('Loop Cycle Running...')"
+        });
+        selectTarget(id, 'element');
+        renderMakerUI();
+    }
+
+    function deleteSelected() {
+        if (selectedId === 'global') return;
+        if (selectedType === 'tab') {
+            uiProject.tabs = uiProject.tabs.filter(t => t.id !== selectedId);
+            currentTabId = uiProject.tabs.length > 0 ? uiProject.tabs[0].id : null;
+        } else if (selectedType === 'element') {
+            uiProject.tabs.forEach(t => t.elements = t.elements.filter(e => e.id !== selectedId));
         }
+        selectTarget('global', 'global');
+        renderMakerUI();
     }
 
-    function listenToNotifications(uid) {
-        rtdb.ref(`notifications/${uid}`).on('value', sn => {
-            const box = document.getElementById('notificationsBox');
-            if(!sn.exists()) {
-                box.innerHTML = 'No active notifications.';
-                return;
+    function selectTarget(id, type) {
+        selectedId = id;
+        selectedType = type;
+
+        document.getElementById('noSelectionMessage').style.display = "none";
+        document.getElementById('inspectorForm').style.display = "flex";
+        document.getElementById('rootNode').classList.remove('active');
+
+        let dimRow = document.getElementById('globalDimensionsRow');
+        let colorRow = document.getElementById('globalColorRow');
+        let codeRow = document.getElementById('codeActionRow');
+        let delBtn = document.getElementById('deleteBtnRow');
+
+        dimRow.style.display = "none";
+        colorRow.style.display = "none";
+        codeRow.style.display = "none";
+        delBtn.style.display = "block";
+
+        if (type === 'global') {
+            document.getElementById('rootNode').classList.add('active');
+            document.getElementById('inspectorTitle').innerText = "Main Window Configuration";
+            document.getElementById('labelName').innerText = "Main Title Label";
+            document.getElementById('propName').value = uiProject.window.title;
+            document.getElementById('propWidth').value = uiProject.window.width;
+            document.getElementById('propHeight').value = uiProject.window.height;
+            document.getElementById('propColor').value = uiProject.window.accent;
+            dimRow.style.display = "flex";
+            colorRow.style.display = "block";
+            delBtn.style.display = "none";
+        } else if (type === 'tab') {
+            let tab = uiProject.tabs.find(t => t.id === id);
+            document.getElementById('inspectorTitle').innerText = "Tab Properties";
+            document.getElementById('labelName').innerText = "Tab Display Name";
+            document.getElementById('propName').value = tab.name;
+        } else if (type === 'element') {
+            let el = null;
+            for (let t of uiProject.tabs) { if (el = t.elements.find(e => e.id === id)) break; }
+            document.getElementById('inspectorTitle').innerText = "Component Settings";
+            document.getElementById('labelName').innerText = "Button / Toggle Label";
+            document.getElementById('propName').value = el.name;
+            document.getElementById('propCode').value = el.code;
+            codeRow.style.display = "flex";
+        }
+        renderTree();
+    }
+
+    function updateProperties() {
+        let n = document.getElementById('propName').value;
+        if (selectedType === 'global') {
+            uiProject.window.title = n;
+            uiProject.window.width = parseInt(document.getElementById('propWidth').value) || 450;
+            uiProject.window.height = parseInt(document.getElementById('propHeight').value) || 300;
+            uiProject.window.accent = document.getElementById('propColor').value;
+        } else if (selectedType === 'tab') {
+            let tab = uiProject.tabs.find(t => t.id === selectedId);
+            if (tab) tab.name = n;
+        } else if (selectedType === 'element') {
+            for (let t of uiProject.tabs) {
+                let el = t.elements.find(e => e.id === selectedId);
+                if (el) { el.name = n; el.code = document.getElementById('propCode').value; break; }
             }
-            let html = '';
-            sn.forEach(c => {
-                let n = c.val();
-                html += `<div class="notify-item ${n.type || ''}">${n.message}</div>`;
+        }
+        renderPreview();
+        compileLuau();
+    }
+
+    function renderTree() {
+        let container = document.getElementById('hierarchyTree');
+        container.innerHTML = "";
+        uiProject.tabs.forEach(t => {
+            let tNode = document.createElement('div');
+            tNode.className = `tree-node ${selectedId === t.id ? 'active' : ''}`;
+            tNode.innerHTML = `<span>[Tab] ${t.name}</span>`;
+            tNode.onclick = () => { currentTabId = t.id; selectTarget(t.id, 'tab'); };
+            container.appendChild(tNode);
+
+            t.elements.forEach(e => {
+                let eNode = document.createElement('div');
+                eNode.className = `tree-node ${selectedId === e.id ? 'active' : ''}`;
+                eNode.style.paddingLeft = "20px";
+                eNode.innerHTML = `<span>${e.type === 'button' ? 'Action:' : 'Loop:'} ${e.name}</span>`;
+                eNode.onclick = (evt) => { evt.stopPropagation(); selectTarget(e.id, 'element'); };
+                container.appendChild(eNode);
             });
-            box.innerHTML = html;
         });
     }
 
-    function clearMyNotifications() {
-        if(auth.currentUser) {
-            rtdb.ref(`notifications/${auth.currentUser.uid}`).remove();
-        }
+    function renderPreview() {
+        let win = document.getElementById('previewWindow');
+        win.style.width = uiProject.window.width + "px";
+        win.style.height = uiProject.window.height + "px";
+        
+        let title = document.getElementById('previewTitle');
+        title.innerText = uiProject.window.title;
+        title.style.color = uiProject.window.accent;
+
+        let tabArea = document.getElementById('previewTabs');
+        let contentArea = document.getElementById('previewContent');
+        tabArea.innerHTML = "";
+        contentArea.innerHTML = "";
+
+        uiProject.tabs.forEach(t => {
+            let btn = document.createElement('div');
+            btn.className = `rbx-tab-btn ${currentTabId === t.id ? 'active' : ''}`;
+            if (currentTabId === t.id) btn.style.borderLeft = `3px solid ${uiProject.window.accent}`;
+            btn.innerText = t.name;
+            btn.onclick = () => { currentTabId = t.id; renderPreview(); };
+            tabArea.appendChild(btn);
+
+            if (currentTabId === t.id) {
+                t.elements.forEach(e => {
+                    let div = document.createElement('div');
+                    if (e.type === 'button') {
+                        div.className = "rbx-ui-button";
+                        div.innerText = e.name;
+                    } else {
+                        div.className = "rbx-ui-toggle";
+                        div.innerHTML = `<span>${e.name}</span><span style="font-size:10px; color:var(--text-muted);">OFF</span>`;
+                    }
+                    contentArea.appendChild(div);
+                });
+            }
+        });
+    }
+
+    function compileLuau() {
+        let lua = `-- [[ PURE CUSTOM EXECUTOR UI FRAMEWORK ]]\n`;
+        lua += `-- [[ Native Object Initialization ]]\n\n`;
+        lua += `local ScreenGui = Instance.new("ScreenGui")\n`;
+        lua += `pcall(function()\n    ScreenGui.Parent = game:GetService("CoreGui")\nend)\n`;
+        lua += `if not ScreenGui.Parent then ScreenGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui") end\n\n`;
+
+        lua += `local MainFrame = Instance.new("Frame")\n`;
+        lua += `MainFrame.Name = "MainWindowFrame"\n`;
+        lua += `MainFrame.Size = UDim2.new(0, ${uiProject.window.width}, 0, ${uiProject.window.height})\n`;
+        lua += `MainFrame.Position = UDim2.new(0.5, -${uiProject.window.width/2}, 0.5, -${uiProject.window.height/2})\n`;
+        lua += `MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 28)\n`;
+        lua += `MainFrame.Active = true\n`;
+        lua += `MainFrame.Parent = ScreenGui\n\n`;
+
+        lua += `local TopBar = Instance.new("Frame")\n`;
+        lua += `TopBar.Size = UDim2.new(1, 0, 0, 36)\n`;
+        lua += `TopBar.BackgroundColor3 = Color3.fromRGB(24, 24, 38)\n`;
+        lua += `TopBar.Parent = MainFrame\n\n`;
+
+        lua += `local Title = Instance.new("TextLabel")\n`;
+        lua += `Title.Size = UDim2.new(1, -40, 1, 0)\n`;
+        lua += `Title.Position = UDim2.new(0, 10, 0, 0)\n`;
+        lua += `Title.Text = "${uiProject.window.title}"\n`;
+        lua += `Title.TextColor3 = Color3.fromHex("${uiProject.window.accent}")\n`;
+        lua += `Title.BackgroundTransparency = 1\n`;
+        lua += `Title.Parent = TopBar\n\n`;
+
+        lua += `local CloseBtn = Instance.new("TextButton")\n`;
+        lua += `CloseBtn.Size = UDim2.new(0, 30, 0, 30)\n`;
+        lua += `CloseBtn.Position = UDim2.new(1, -32, 0, 3)\n`;
+        lua += `CloseBtn.Text = "✕"\n`;
+        lua += `CloseBtn.TextColor3 = Color3.fromRGB(239, 68, 68)\n`;
+        lua += `CloseBtn.BackgroundTransparency = 1\n`;
+        lua += `CloseBtn.Parent = TopBar\n`;
+        lua += `CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)\n\n`;
+
+        uiProject.tabs.forEach((t, tIdx) => {
+            lua += `-- Tab: ${t.name}\n`;
+            t.elements.forEach((e, eIdx) => {
+                if (e.type === 'button') {
+                    lua += `local Btn_${tIdx}_${eIdx} = Instance.new("TextButton")\n`;
+                    lua += `Btn_${tIdx}_${eIdx}.Text = "${e.name}"\n`;
+                    lua += `Btn_${tIdx}_${eIdx}.Parent = MainFrame\n`;
+                    lua += `Btn_${tIdx}_${eIdx}.MouseButton1Click:Connect(function()\n`;
+                    lua += `    ${e.code.replace(/\n/g, '\n    ')}\n`;
+                    lua += `end)\n\n`;
+                }
+            });
+        });
+
+        document.getElementById("luauCodeBox").value = lua;
+    }
+
+    function copyLuauScript() {
+        let codeArea = document.getElementById("luauCodeBox");
+        codeArea.select();
+        navigator.clipboard.writeText(codeArea.value).then(() => alert("Luau Script Copied!"));
+    }
+
+    function exportMakerCodeToSubmit() {
+        const code = document.getElementById("luauCodeBox").value;
+        document.getElementById("code").value = code;
+        document.getElementById("title").value = uiProject.window.title || "Custom UI Layout";
+        document.getElementById("desc").value = "Generated using the built-in Interactive UI Maker.";
+        switchView("submit-view");
     }
 </script>
 </body>
